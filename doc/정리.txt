@@ -1,0 +1,16 @@
+db: fireprjdb, dbadmin / p#ssw0rd
+
+화면: 
+화재감시설비
+ - 감지기 관리   router : /sensor_manage  , SensorManage.vue   /api/v1/sensor
+ - 중계기 관리   router : /repeater_manage  , RepeaterManage.vue   /api/v1/repeater
+ - 수신기 관리   router : /receiver_manage  , ReceiverManage.vue   /api/v1/receiver
+실시간 모니터링
+ - 실시간 감지기 router : /sensor_event  , SersorEvent.vue   /api/v1/sensor_event
+ - 실시간 이벤트 router : /log_event  , LogEvent.vue   /api/v1/log_event
+데이터 분석
+ - 이벤트 분석    router : /sensor_analysis  , SensorAnalysis.vue   /api/v1/sensor_analysis
+CRM
+ - 사용자 관리    router : /user_manage  , UserManage.vue   /api/v1/user
+
+
