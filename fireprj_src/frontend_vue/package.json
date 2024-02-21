@@ -74,7 +74,9 @@
       "parser": "babel-eslint"
     }
   },
-  "eslintIgnore": ["src/components/Agreement/*"],
+  "eslintIgnore": [
+    "src/components/Agreement/*"
+  ],
   "postcss": {
     "plugins": {
       "autoprefixer": {}
