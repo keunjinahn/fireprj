@@ -8,13 +8,13 @@ async function rootAccess(to, from, next) {
   if (!session.authentication && to.query.uid) {
     try {
       await session.loginFromProp(to.query.uid)
-      next({ name: 'dashboard' })
+      next({ name: 'sensor_manage' })
     }
     catch (e) {
-      next({ name: 'dashboard' })
+      next({ name: 'sensor_manage' })
     }
   }
-  else next({ name: 'dashboard' })
+  else next({ name: 'sensor_manage' })
 }
 
 const beforeEnter = (to, from, next) => {
@@ -52,109 +52,79 @@ const routes = [{
   ]
 },
 {
-  path: '/dashboard',
-  name: 'dashboard',
-  component: View.Dashboard,
-  beforeEnter
+  path: '/manage',
+  name: 'manage',
+  component: View.SensorManage,
+  redirect: { name: 'sensor_manage' },
+  beforeEnter,
+  children: [
+    {
+      path: 'sensor_manage',
+      name: 'sensor_manage',
+      component: View.SensorManage,
+      meta: { breadcrumb: [{ text: '관리', disabled: true }, { text: '감지기 관리', disabled: true }] },
+      props: true,
+      beforeEnter
+    },
+    {
+      path: 'repeater_manage',
+      name: 'repeater_manage',
+      component: View.RepeaterManage,
+      meta: { breadcrumb: [{ text: '관리', disabled: true }, { text: '중계기 관리', disabled: true }] },
+      props: true,
+      beforeEnter
+    },
+    {
+      path: 'receiver_manage',
+      name: 'receiver_manage',
+      component: View.ReceiverManage,
+      meta: { breadcrumb: [{ text: '관리', disabled: true }, { text: '수신기 관리', disabled: true }] },
+      props: true,
+      beforeEnter
+    },
+  ]
 },
 {
-  path: '/typhoon_manage',
-  name: 'typhoon_manage',
-  component: View.Typhoon_Manage,
-  meta: { breadcrumb: [{ text: '모니터링', disabled: true }, { text: '태풍관리', disabled: true }] },
+  path: '/monitor',
+  name: 'monitor',
+  component: View.SubView,
+  redirect: { name: 'sensor_event' },
+  beforeEnter,
+  children: [
+    {
+      path: 'sensor_event',
+      name: 'sensor_event',
+      component: View.SensorEvent,
+      meta: { breadcrumb: [{ text: '모니터링', disabled: true }, { text: '실시간 이벤트', disabled: true }] },
+      props: true,
+      beforeEnter
+    },
+    {
+      path: 'event_list',
+      name: 'event_list',
+      component: View.EventList,
+      meta: { breadcrumb: [{ text: '모니터링', disabled: true }, { text: '이벤트 리스트', disabled: true }] },
+      props: true,
+      beforeEnter
+    },
+  ]
+},
+{
+  path: '/sensor_analysis',
+  name: 'sensor_analysis',
+  component: View.SensorAnalysis,
+  meta: { breadcrumb: [{ text: '데이터 분석', disabled: true }, { text: '이벤트 분석', disabled: true }] },
   props: true,
   beforeEnter
 },
 {
-  path: '/typhoon_manage/:fstatus',
-  name: 'typhoon_manage_tab',
-  component: View.Typhoon_Manage,
-  meta: { breadcrumb: [{ text: '모니터링', disabled: true }, { text: '태풍관리', disabled: true }] },
-  props: true,
-  beforeEnter
-},
-{
-  path: '/damage_manage',
-  name: 'damage_manage',
-  component: View.Damage_Manage,
-  meta: { breadcrumb: [{ text: '모니터링', disabled: true }, { text: '태풍 피해 관리', disabled: true }] },
-  props: true,
-  beforeEnter
-},
-{
-  path: '/damage_manage/:fstatus',
-  name: 'damage_manage_tab',
-  component: View.Damage_Manage,
-  meta: { breadcrumb: [{ text: '모니터링', disabled: true }, { text: '태풍 피해 관리', disabled: true }] },
-  props: true,
-  beforeEnter
-},
-{
-  path: '/statistics',
-  name: 'statistics_dashboard',
-  component: View.Statistics_Dashboard,
-  meta: { breadcrumb: [{ text: '통계 관리', disabled: true }, { text: '태풍 통계 현황', disabled: true }] },
-  props: true,
-  beforeEnter
-},
-{
-  path: '/statistics/:fstatus',
-  name: 'statistics_dashboard_tab',
-  component: View.Statistics_Dashboard,
-  meta: { breadcrumb: [{ text: '통계 관리', disabled: true }, { text: '태풍 통계 현황', disabled: true }] },
-  props: true,
-  beforeEnter
-},
-{
-  path: '/report/',
-  name: 'statistics_report',
-  component: View.Statistics_Report,
-  meta: { breadcrumb: [{ text: '보고서 관리', disabled: true }, { text: '세부 피해내역 보고서', disabled: true }] },
-  props: true,
-  beforeEnter
-},
-{
-  path: '/report/:fstatus',
-  name: 'statistics_report_tab',
-  component: View.Statistics_Report,
-  meta: { breadcrumb: [{ text: '보고서 관리', disabled: true }, { text: '세부 피해내역 보고서', disabled: true }] },
-  props: true,
-  beforeEnter
-},
-{
-  path: '/user/',
+  path: '/user_manage',
   name: 'user_manage',
-  component: View.User_Manage,
-  meta: { breadcrumb: [{ text: '사용자 관리', disabled: true }, { text: '사용자 관리', disabled: true }] },
+  component: View.UserManage,
+  meta: { breadcrumb: [{ text: 'CRM', disabled: true }, { text: '사용자 관리', disabled: true }] },
   props: true,
   beforeEnter
 },
-{
-  path: '/user/:fstatus',
-  name: 'user_manage_tab',
-  component: View.User_Manage,
-  meta: { breadcrumb: [{ text: '사용자 관리', disabled: true }, { text: '사용자 관리', disabled: true }] },
-  props: true,
-  beforeEnter
-},
-{
-  path: '/community',
-  name: 'community_list',
-  component: View.Community_List,
-  meta: { breadcrumb: [{ text: '커뮤니티', disabled: true }, { text: '커뮤니티', disabled: true }] },
-  props: true,
-  beforeEnter
-
-},
-{
-  path: '/community/:fstatus',
-  name: 'community_list_tab',
-  component: View.Community_List,
-  meta: { breadcrumb: [{ text: '커뮤니티', disabled: true }, { text: '커뮤니티', disabled: true }] },
-  props: true,
-  beforeEnter
-
-}
 ]
 
 const router = new VueRouter({

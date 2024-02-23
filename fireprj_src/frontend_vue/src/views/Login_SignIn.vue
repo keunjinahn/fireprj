@@ -1,9 +1,78 @@
 <template>
- <div>
- </div>
+  <div class="d-flex elevation-2 white">
+    <div class="login-panel">
+      <div class="login-panel-inner">
+        <div class="login-legend">
+          <h1>login</h1>
+        </div>
+        <div class="login-input-wrap">
+          <v-tabs-items v-model="tabs">
+            <v-tab-item value="tab1">
+              <div class="login-inner">
+                <v-form>
+                  <div class="mb-4">
+                    <v-text-field outlined dense hide-details
+                      v-model="form.user_id"
+                      label="아이디"
+                      name="login"
+                      type="text"
+                      prepend-inner-icon="person"
+                      @keypress.enter="login"
+                    />
+                  </div>
+                  <div>
+                    <v-text-field outlined dense hide-details
+                      v-model="form.user_pw"
+                      id="password"
+                      label="비밀번호"
+                      name="password"
+                      prepend-inner-icon="lock"
+                      type="password"
+                      @keypress.enter="login"
+                    />
+                  </div>
+                </v-form>
+              </div>
+            </v-tab-item>
+          </v-tabs-items>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
+export default {
+  methods: {
+    async login() {
+      let data = {
+        'user': {
+          'token': '1234'
+        }
+      }
+      await this.$session.login(data);
+      this.$router.replace({name: 'sensor_manage'})
+    }
+  },
+  data(){
+    return {
+      // loading: false,
+      form: {
+        user_id: "",
+        user_pw: "",
+
+      },
+      // notices: [],
+      // popup: {
+      //   show: false,
+      //   data: null
+      // },
+      // remember: false,
+      // autologin: false,
+      tabs: 'tab1'
+    };
+  }
+}
 </script>
 
 <style lang="scss" scoped>
