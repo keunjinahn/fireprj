@@ -225,10 +225,10 @@ export default {
       let {data} = await this.$http.get("sensor")
       this.sensor.data = data.objects;
     },
-    addSensor() {
+    async addSensor() {
       // 2번 호출되서 서버에 objectDeletedError 뜸
       let param = this.addPopup.form;
-      this.$http.post("sensor", param)
+      await this.$http.post("sensor", param)
       this.getSensor()
       this.addPopup.show = false;
     },
@@ -236,10 +236,10 @@ export default {
       this.infoPopup.form = item;
       this.infoPopup.show = true;
     },
-    modifySensorData() {
+    async modifySensorData() {
       let param = this.infoPopup.form;
       delete param.customer;
-      this.$http.patch(`sensor/${param.id}`, param)
+      await this.$http.patch(`sensor/${param.id}`, param)
       this.getSensor()
       this.infoPopup.show = false;
     },
@@ -247,9 +247,9 @@ export default {
       this.deletePopup.delTarget = item.id;
       this.deletePopup.show = true;
     },
-    deleteSensor() {
+    async deleteSensor() {
       let param = this.deletePopup.delTarget;
-      this.$http.delete(`sensor/${param}`)
+      await this.$http.delete(`sensor/${param}`)
       this.getSensor()
       this.deletePopup.show = false;
     }

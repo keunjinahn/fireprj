@@ -42,7 +42,7 @@ class FireReceiverTbl(db.Model):
     __tablename__ = 'fire_receiver_tbl'
     
     id = db.Column('id', db.Integer, primary_key=True)
-    receiver_idx = db.Column('receiver_idx', db.String(11), primary_key=True)
+    receiver_idx = db.Column('receiver_idx', db.String(11))
     fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
     receiver_type = db.Column('receiver_type', db.Integer)
     receiver_id = db.Column('receiver_id', db.Integer)
@@ -52,7 +52,7 @@ class FireRepeaterTbl(db.Model):
     __tablename__ = 'fire_repeater_tbl'
 
     id = db.Column('id', db.Integer, primary_key=True)
-    repeater_idx = db.Column('repeater_idx', db.String(11), primary_key=True)
+    repeater_idx = db.Column('repeater_idx', db.String(11))
     fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
     receiver_id = db.Column('receiver_id', db.Integer)
     system_id = db.Column('system_id', db.Integer, default='00')
@@ -63,7 +63,7 @@ class FireSensorTbl(db.Model):
     __tablename__ = 'fire_sensor_tbl'
 
     id = db.Column('id', db.Integer, primary_key=True)
-    sensor_idx = db.Column('sensor_idx', db.String(17), primary_key=True)
+    sensor_idx = db.Column('sensor_idx', db.String(17))
     fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
     receiver_id = db.Column('receiver_id', db.Integer)
     system_id = db.Column('system_id', db.Integer, default='00')
@@ -75,7 +75,7 @@ class UserTbl(db.Model):
     __tablename__ = 'user_tbl'
 
     id = db.Column('id', db.Integer, primary_key=True)
-    user_id = db.Column('user_id', db.String(10), primary_key=True)
+    user_id = db.Column('user_id', db.String(10))
     user_pwd = db.Column('user_pwd', db.String(10))
     user_name = db.Column('user_name', db.String(45))
     user_status = db.Column('user_status', db.Integer, default='1')
