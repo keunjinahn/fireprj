@@ -54,7 +54,7 @@ const routes = [{
 {
   path: '/manage',
   name: 'manage',
-  component: View.SensorManage,
+  component: View.SubView,
   redirect: { name: 'sensor_manage' },
   beforeEnter,
   children: [

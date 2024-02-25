@@ -28,7 +28,8 @@ class EventLogTbl(db.Model):
 class EventTbl(db.Model):
     __tablename__ = 'event_tbl'
 
-    event_idx = db.Column('event_idx', db.String(12), primary_key=True)
+    id = db.Column('id', db.Integer, primary_key=True)
+    event_idx = db.Column('event_idx', db.String(12))
     fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
     receiver_type = db.Column('receiver_type', db.Integer)
     event_type = db.Column('event_type', db.Integer)
@@ -39,7 +40,8 @@ class EventTbl(db.Model):
 
 class FireReceiverTbl(db.Model):
     __tablename__ = 'fire_receiver_tbl'
-
+    
+    id = db.Column('id', db.Integer, primary_key=True)
     receiver_idx = db.Column('receiver_idx', db.String(11), primary_key=True)
     fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
     receiver_type = db.Column('receiver_type', db.Integer)
@@ -49,6 +51,7 @@ class FireReceiverTbl(db.Model):
 class FireRepeaterTbl(db.Model):
     __tablename__ = 'fire_repeater_tbl'
 
+    id = db.Column('id', db.Integer, primary_key=True)
     repeater_idx = db.Column('repeater_idx', db.String(11), primary_key=True)
     fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
     receiver_id = db.Column('receiver_id', db.Integer)
@@ -59,6 +62,7 @@ class FireRepeaterTbl(db.Model):
 class FireSensorTbl(db.Model):
     __tablename__ = 'fire_sensor_tbl'
 
+    id = db.Column('id', db.Integer, primary_key=True)
     sensor_idx = db.Column('sensor_idx', db.String(17), primary_key=True)
     fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
     receiver_id = db.Column('receiver_id', db.Integer)
@@ -70,6 +74,7 @@ class FireSensorTbl(db.Model):
 class UserTbl(db.Model):
     __tablename__ = 'user_tbl'
 
+    id = db.Column('id', db.Integer, primary_key=True)
     user_id = db.Column('user_id', db.String(10), primary_key=True)
     user_pwd = db.Column('user_pwd', db.String(10))
     user_name = db.Column('user_name', db.String(45))

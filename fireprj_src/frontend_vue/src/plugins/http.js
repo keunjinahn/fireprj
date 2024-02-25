@@ -7,7 +7,7 @@ if (sessionToken) {
 }
 
 const http = axios.create({
-  baseURL: `/api/monitor/${process.env.VUE_APP_API_MONITOR_VER}`,
+  baseURL: `/api/${process.env.VUE_APP_API_MONITOR_VER}`,
   timeout: 50 * 1000,
   headers: {
     common: commonHeader

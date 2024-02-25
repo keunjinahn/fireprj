@@ -8,7 +8,7 @@ class CommonConfig(object):
     API_HEADERS = {'Content-type': 'application/json'}
 
 class DevelopmentConfig(CommonConfig):
-    DATABASE = "typhoon"
+    DATABASE = "fireprjdb"
     BIND_PORT = 8081
     # SQLALCHEMY_DATABASE_URI = 'mysql://dbadmin:p#ssw0rd@127.0.0.1/edufadb'
     SQLALCHEMY_DATABASE_URI = 'mysql://dbadmin:p#ssw0rd@127.0.0.1/fireprjdb'
