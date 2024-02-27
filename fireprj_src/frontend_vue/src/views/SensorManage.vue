@@ -222,6 +222,7 @@ export default {
   components: {},
   methods: {
     async getSensor() {
+
       let {data} = await this.$http.get("sensor")
       this.sensor.data = data.objects;
     },
@@ -272,7 +273,7 @@ export default {
           {text: "삭제 여부", value: "delete",align: 'center', sortable: false, width: 20},
         ],
         data: [],
-        options: {},
+        options: {"page":1,"itemsPerPage":5,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
       },
       loading: false,
