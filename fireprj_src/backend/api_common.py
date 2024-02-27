@@ -8,21 +8,11 @@ from datetime import datetime, timedelta
 import os
 import json
 from functools import wraps
-# import requests
 
 from backend import app, login_manager
 from backend_model.table_fireprj import *
 from backend import manager
 db = DBManager.db
-
-# 테스트용
-@app.route('/fireprj/test', methods=['GET'])
-def fireprj_test():
-    test = UserTbl.query.all()
-    t = test[0]
-    result = {col.name: getattr(t, col.name) for col in t.__table__.columns}
-    print(result)
-    return make_response(jsonify(''), 200)
 
 manager.create_api(FireSensorTbl
                    , results_per_page=10000
@@ -50,8 +40,12 @@ def get_realtime_sensor(result=None, **kw):
     all_logs = EventLogTbl.query.all()
     for sensor in res:
         sensor['regist_status'] = True #등록상태: 센서의 데이터가 존재하면 무조건 True
-        last_sensor_log = list(filter(lambda x: x.sensor_id == sensor['sensor_id'], all_logs))[-1]
+        last_sensor_log = list(filter(lambda x: x.sensor_id == sensor['sensor_id'], all_logs))
+        if len(last_sensor_log) > 0: last_sensor_log = last_sensor_log[-1]
+        else: sensor['action_status'] = sensor['network_status'] = sensor['battery_status'] = False; continue
         offset_time = datetime.now() - timedelta(minutes=1)
+        sensor['receiver_type'] = last_sensor_log.receiver_type
+        sensor['event_datetime'] = last_sensor_log.event_datetime
         sensor['action_status'] = sensor['network_status'] = sensor['battery_status'] \
         = True if last_sensor_log.event_datetime >= offset_time else False #1분 이내의 데이터가 있으면 True
 
@@ -85,3 +79,4 @@ manager.create_api(UserTbl
                    , collection_name='user'
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)
+

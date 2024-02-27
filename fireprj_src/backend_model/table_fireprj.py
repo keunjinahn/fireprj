@@ -20,7 +20,7 @@ class EventLogTbl(db.Model):
     system_id = db.Column('system_id', db.Integer, default='00')
     repeater_id = db.Column('repeater_id', db.Integer)
     sensor_id = db.Column('sensor_id', db.Integer)
-    sensor_value = db.Column('sensor_value', db.Integer)
+    sensor_value = db.Column('sensor_value', db.String)
     inout_id = db.Column('inout_id', db.Integer, default='00')
     event_datetime = db.Column('event_datetime', db.DateTime)
     customer = db.relationship('CustomerTbl')
