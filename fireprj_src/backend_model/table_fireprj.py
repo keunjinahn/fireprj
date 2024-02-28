@@ -30,13 +30,12 @@ class EventTbl(db.Model):
 
     id = db.Column('id', db.Integer, primary_key=True)
     event_idx = db.Column('event_idx', db.String(12))
-    fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
-    receiver_type = db.Column('receiver_type', db.Integer)
-    event_type = db.Column('event_type', db.Integer)
-    event_id = db.Column('event_id', db.Integer)
-    sensor_id = db.Column('sensor_id', db.Integer, default='00')
-    event_desc = db.Column('event_desc', db.String(100))
-    customer = db.relationship('CustomerTbl')
+    system_id_c = db.Column('system_id_c', db.String)
+    repeater_id_c = db.Column('repeater_id_c', db.String)
+    sensor_id_c = db.Column('sensor_id_c', db.String)
+    sensor_value_c = db.Column('sensor_value_c', db.String)
+    inout_id_c = db.Column('inout_id_c', db.String)
+    event_desc = db.Column('event_desc', db.String)
 
 class FireReceiverTbl(db.Model):
     __tablename__ = 'fire_receiver_tbl'

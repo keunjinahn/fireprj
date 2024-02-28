@@ -65,11 +65,12 @@ class ExampleLogAgent(object):
             print(values_string)
     
     def example_logging(self, cursor):
-        sensor_list_sql = '''
-        SELECT * FROM fire_sensor_tbl
-        '''
-        cursor.execute(sensor_list_sql)
-        sensor_list = [row for row in cursor.fetchall()]
+        # 센서 갯수 많아져서 리미트 걸어야함/ 나중에 수정 필요
+        # sensor_list_sql = '''
+        # SELECT * FROM fire_sensor_tbl
+        # '''
+        # cursor.execute(sensor_list_sql)
+        # sensor_list = [row for row in cursor.fetchall()]
         
         is_error_cnt = 0
         while is_error_cnt < 1: #샘플 데이터가 없으면 새로 만드는 반복문
