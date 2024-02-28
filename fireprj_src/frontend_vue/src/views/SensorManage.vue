@@ -8,8 +8,24 @@
 
         <v-card flat>
           <v-toolbar rounded dense class="elevation-1">
-            <v-col cols="8"></v-col>
-            <v-col cols="2">
+            <v-col cols="5">
+              <v-text-field outlined dense hide-details
+                            placeholder="감지기 검색"
+                            append-icon="mdi-magnify"
+                            v-model="sensor.search"
+                            @keydown.enter="getSensor()"
+                            class="m-right"
+              />
+            </v-col>
+            <v-col cols="1">
+              <v-btn depressed dark big
+                      color="light-blue darken-2"
+                      @click="getSensor()">
+                
+                <div class="ml-1">조회</div>
+              </v-btn>
+            </v-col>
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       @click="addPopup.show=true"
@@ -17,7 +33,7 @@
                 <div class="ml-1">추가</div>
               </v-btn>
             </v-col>
-            <v-col cols="2">
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       class="m-left">
@@ -34,6 +50,7 @@
           :loading="sensor.loading"
           :options.sync="sensor.options"
           :server-items-length="sensor.total"
+          :search="sensor.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           @click:row="popupSensorData"
@@ -221,13 +238,46 @@ export default {
   },
   components: {},
   methods: {
-    async getSensor() {
+    // async getSensor() {
 
-      let {data} = await this.$http.get("sensor")
-      this.sensor.data = data.objects;
+    //   let {data} = await this.$http.get("sensor")
+    //   this.sensor.data = data.objects;
+    // },
+    async getSensor() {
+      this.sensor.loading = true;
+      const { page, itemsPerPage} = this.sensor.options;
+        try {
+          let filters_or = []
+          let filters_and = []
+          let order_by = []
+
+          order_by.push({field: 'sensor_idx', direction: 'asc'})
+
+          let q = {
+            filters: [{or: filters_or}, {and: filters_and}],
+            order_by
+          }
+          let params = {
+            q: q,
+            results_per_page: itemsPerPage,
+            page: page,
+          };
+
+          let { data } = await this.$http.get("sensor", { params });
+          this.sensor.data = data.objects
+          this.sensor.total = data.num_results;
+          this.sensor.data = data.objects.map((v, i) => {
+            v._index = i + (page - 1) * itemsPerPage + 1;
+            return v;
+          });
+        } catch (err) {
+          console.error(err);
+        } finally {
+          this.sensor.loading = false;
+        }
     },
     async addSensor() {
-      // 2번 호출되서 서버에 objectDeletedError 뜸
+
       let param = this.addPopup.form;
       await this.$http.post("sensor", param)
       this.getSensor()
@@ -259,6 +309,11 @@ export default {
     this.getSensor()
   },
   watch: {
+    "sensor.options": {
+      handler() {
+      },
+      deep: true,
+    },
   },
   data() {
     return {
@@ -275,6 +330,7 @@ export default {
         data: [],
         options: {"page":1,"itemsPerPage":5,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
+        search: '',
       },
       loading: false,
       addPopup: {

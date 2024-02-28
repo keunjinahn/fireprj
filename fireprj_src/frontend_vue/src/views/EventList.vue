@@ -8,8 +8,24 @@
 
         <v-card flat>
           <v-toolbar rounded dense class="elevation-1">
-            <v-col cols="10"></v-col>
-            <v-col cols="2">
+            <v-col cols="5">
+              <v-text-field outlined dense hide-details
+                            placeholder="이벤트 검색"
+                            append-icon="mdi-magnify"
+                            v-model="sensor.search"
+                            @keydown.enter="getSensor()"
+                            class="m-right"
+              />
+            </v-col>
+            <v-col cols="1">
+              <v-btn depressed dark big
+                      color="light-blue darken-2"
+                      @click="getSensor()">
+                
+                <div class="ml-1">조회</div>
+              </v-btn>
+            </v-col>
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       class="m-left">
@@ -26,6 +42,7 @@
           :loading="sensor.loading"
           :options.sync="sensor.options"
           :server-items-length="sensor.total"
+          :search="sensor.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           @click:row="popupSensorData"
@@ -40,7 +57,7 @@
               <td >{{ row.item.system_id }}</td>
               <td >{{ row.item.repeater_id }}</td>
               <td >{{ row.item.sensor_id }}</td>
-              <!-- <td >{{ row.item. }}</td> -->
+              <td >{{ row.item.event_desc }}</td>
             </tr>
           </template>
         </v-data-table>
@@ -68,6 +85,11 @@ export default {
     this.getSensor()
   },
   watch: {
+    "sensor.options": {
+      handler() {
+      },
+      deep: true,
+    },
   },
   data() {
     return {
@@ -81,11 +103,12 @@ export default {
           {text: "계통 번호", value: "system_id",align: 'center', sortable: false, width: 20},
           {text: "중계기 번호", value: "repeater_id",align: 'center', sortable: false, width: 20},
           {text: "감지기 번호", value: "sensor_id",align: 'center', sortable: false, width: 20},
-          {text: "회선 설명", value: "",align: 'center', sortable: false, width: 20},
+          {text: "회선 설명", value: "event_desc",align: 'center', sortable: false, width: 20},
         ],
         data: [],
-        options: {"page":1,"itemsPerPage":5,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
+        options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
+        search: '',
       },
       loading: false,
       addPopup: {

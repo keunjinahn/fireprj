@@ -144,7 +144,7 @@ export default {
         ]
       },
       {
-        icon: "mdi-solar-panel-large",
+        icon: "mdi-desktop-mac-dashboard",
         text: "실시간 모니터링",
         subLinks: [
           { text: "실시간 감지기", route: "sensor_event"},
@@ -152,14 +152,14 @@ export default {
         ]
       },
       {
-        icon: "mdi-solar-panel-large",
+        icon: "mdi-chart-areaspline-variant",
         text: "데이터 분석",
         subLinks: [
           { text: "데이터 분석", route: "sensor_analysis"},
         ]
       },
       {
-        icon: "mdi-solar-panel-large",
+        icon: "mdi-account-plus",
         text: "CRM",
         subLinks: [
           { text: "사용자 관리", route: "user_manage"},

@@ -8,8 +8,24 @@
 
         <v-card flat>
           <v-toolbar rounded dense class="elevation-1">
-            <v-col cols="10"></v-col>
-            <v-col cols="2">
+            <v-col cols="5">
+              <v-text-field outlined dense hide-details
+                            placeholder="감지기 검색"
+                            append-icon="mdi-magnify"
+                            v-model="sensor.search"
+                            @keydown.enter="getSensor()"
+                            class="m-right"
+              />
+            </v-col>
+            <v-col cols="1">
+              <v-btn depressed dark big
+                      color="light-blue darken-2"
+                      @click="getSensor()">
+                
+                <div class="ml-1">조회</div>
+              </v-btn>
+            </v-col>
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       class="m-left">
@@ -26,11 +42,13 @@
           :loading="sensor.loading"
           :options.sync="sensor.options"
           :server-items-length="sensor.total"
+          :search="sensor.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           class="elevation-1 mt-4">
           <template v-slot:item="row">
             <tr>
+              <td >{{ row.item.event_datetime }}</td>
               <td >{{ row.item.fk_customer_idx }}</td>
               <td >{{ row.item.customer.customer_name }}</td>
               <td >{{ row.item.receiver_type }}</td>
@@ -107,6 +125,7 @@ export default {
     return {
       sensor: {
         headers: [
+          {text: "이벤트 시간", value: "event_datetime", sortable: false,align: 'center', width: 80}, 
           {text: "고객 식별자", value: "fk_customer_idx",align: 'center', sortable: false, width: 60},
           {text: "고객명", value: "customer.customer_name",align: 'center', sortable: false, width: 40},
           {text: "수신기 타입", value: "receiver_type",align: 'center', sortable: false, width: 20},
@@ -120,8 +139,9 @@ export default {
           {text: "배터리 상태", value: "battery_status",align: 'center', sortable: false, width: 20},
         ],
         data: [],
-        options: {"page":1,"itemsPerPage":5,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
+        options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
+        search: '',
       },
       loading: false,
     };

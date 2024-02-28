@@ -8,8 +8,24 @@
 
         <v-card flat>
           <v-toolbar rounded dense class="elevation-1">
-            <v-col cols="8"></v-col>
-            <v-col cols="2">
+            <v-col cols="5">
+              <v-text-field outlined dense hide-details
+                            placeholder="중계기 검색"
+                            append-icon="mdi-magnify"
+                            v-model="repeater.search"
+                            @keydown.enter="getRepeater()"
+                            class="m-right"
+              />
+            </v-col>
+            <v-col cols="1">
+              <v-btn depressed dark big
+                      color="light-blue darken-2"
+                      @click="getRepeater()">
+                
+                <div class="ml-1">조회</div>
+              </v-btn>
+            </v-col>
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       @click="addPopup.show=true"
@@ -17,7 +33,7 @@
                 <div class="ml-1">추가</div>
               </v-btn>
             </v-col>
-            <v-col cols="2">
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       class="m-left">
@@ -29,15 +45,17 @@
         </v-card>
 
         <v-data-table
-          :headers="sensor.headers"
-          :items="sensor.data"
-          :loading="sensor.loading"
-          :options.sync="sensor.options"
-          :server-items-length="sensor.total"
+          :headers="repeater.headers"
+          :items="repeater.data"
+          :loading="repeater.loading"
+          :options.sync="repeater.options"
+          :server-items-length="repeater.total"
           :items-per-page="5"
+          :search="repeater.search"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
-          @click:row="popupSensorData"
-          class="elevation-1 mt-4 clickable-row">
+          @click:row="popupRepeaterData"
+          class="elevation-1 mt-4 clickable-row"
+          @input="onSelectedChnage">
           <template v-slot:[`item.delete`]="{item}">
             <v-btn depressed small color="deep-orange accent-4"
                     dark class="ml-1"
@@ -104,7 +122,7 @@
               <v-btn color="primary"
                       class="flex-grow-1 ml-2"
                       dark depressed
-                      @click="addSensor()">
+                      @click="addRepeater()">
                 추가  
               </v-btn>
             </v-card-action>
@@ -167,7 +185,7 @@
               <v-btn color="primary"
                       class="flex-grow-1 ml-2"
                       dark depressed
-                      @click="modifySensorData()">
+                      @click="modifyRepeaterData()">
                 수정  
               </v-btn>
             </v-card-action>
@@ -189,7 +207,7 @@
               <v-btn color="primary"
                       class="flex-grow-1 ml-2"
                       dark depressed
-                      @click="deleteSensor()">
+                      @click="deleteRepeater()">
                 삭제  
               </v-btn>
             </v-card-action>
@@ -207,48 +225,105 @@ export default {
   },
   components: {},
   methods: {
-    async getSensor() {
+    async getRepeater() {
 
       let {data} = await this.$http.get("repeater")
-      this.sensor.data = data.objects;
+      this.repeater.data = data.objects;
     },
-    async addSensor() {
-      // 2번 호출되서 서버에 objectDeletedError 뜸
+
+    // async getRepeater () {
+    //   this.users.loading = true;
+    //   const { page, itemsPerPage ,sortBy, sortDesc  } = this.repeater.options;
+    //   let order_by = []
+    //   let filters_or = [];
+    //   let filters_and = [];
+    //   var api_name = 'repeater'
+
+    //   // 정렬 선택이 있을 경우
+    //   if (sortBy.length) {
+    //     for (let i=0; i<sortBy.length; i++) {
+    //       order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
+    //     }
+    //   }
+    //   // 정렬 선택이 없을 경우 id를 기본으로 정렬
+    //   else order_by.push({field: 'id', direction: 'desc'})
+    //   filters_or.push({"name": "repeater_idx", "op": "like", "val": "%"+this.repeater.search+"%"});
+
+    //   if(this.repeater.search.length > 0) {
+    //     filters_or.push({"name": "fk_customer_idx", "op": "like", "val": "%" + this.repeater.search + "%"});
+    //   }
+
+    //   try {
+    //     let q = JSON.stringify({
+    //       filters: [{or:filters_or},{and:filters_and}],
+    //       order_by
+    //     })
+    //     let params = {
+    //       q: q,
+    //       results_per_page: itemsPerPage,
+    //       page: page,
+    //     }
+
+    //     let { data } = await this.$http.get(api_name, { params })
+    //     this.repeater.total = data.num_results;
+    //     this.repeater.data = data.objects.map((v, i) => {
+    //       v._index = i + (page - 1) * itemsPerPage + 1;
+    //       return v; });
+    //   } 
+    //   catch (err) {
+    //     console.error(err);
+    //   } 
+    //   finally {
+    //     this.repeater.loading = false;
+    //   }
+    // },
+
+    // onSelectedChnage(){
+    //   this.repeater.data.forEach(v=>v.enable=false)
+    //   this.repeater.selected.forEach(v=>v.enable=true)
+    // },
+    async addRepeater() {
       let param = this.addPopup.form;
       await this.$http.post("repeater", param)
-      this.getSensor()
+      this.getRepeater()
       this.addPopup.show = false;
     },
-    popupSensorData(e, {item}) {
+    popupRepeaterData(e, {item}) {
       this.infoPopup.form = item;
       this.infoPopup.show = true;
     },
-    async modifySensorData() {
+    async modifyRepeaterData() {
       let param = this.infoPopup.form;
       delete param.customer;
       await this.$http.patch(`repeater/${param.id}`, param)
-      this.getSensor()
+      this.getRepeater()
       this.infoPopup.show = false;
     },
     openDeletePopup(item) {
       this.deletePopup.delTarget = item.id;
       this.deletePopup.show = true;
     },
-    async deleteSensor() {
+    async deleteRepeater() {
       let param = this.deletePopup.delTarget;
       await this.$http.delete(`repeater/${param}`)
-      this.getSensor()
+      this.getRepeater()
       this.deletePopup.show = false;
     }
   },
   mounted() {
-    this.getSensor()
+    this.getRepeater()
   },
   watch: {
+    "repeater.options": {
+      handler() {
+      },
+      deep: true,
+    },
   },
   data() {
     return {
-      sensor: {
+      repeater: {
+        selected: [],
         headers: [
           {text: '중계기 식별자', value: 'repeater_idx', sortable: false,align: 'center', width: 80},
           {text: "고객식별자", value: "fk_customer_idx",align: 'center', sortable: false, width: 60},
@@ -258,8 +333,9 @@ export default {
           {text: "삭제 여부", value: "delete",align: 'center', sortable: false, width: 20},
         ],
         data: [],
-        options: {},
+        options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
+        search: '',
       },
       loading: false,
       addPopup: {

@@ -8,8 +8,24 @@
 
         <v-card flat>
           <v-toolbar rounded dense class="elevation-1">
-            <v-col cols="8"></v-col>
-            <v-col cols="2">
+            <v-col cols="5">
+              <v-text-field outlined dense hide-details
+                            placeholder="수신기 검색"
+                            append-icon="mdi-magnify"
+                            v-model="receiver.search"
+                            @keydown.enter="getReceiver()"
+                            class="m-right"
+              />
+            </v-col>
+            <v-col cols="1">
+              <v-btn depressed dark big
+                      color="light-blue darken-2"
+                      @click="getReceiver()">
+                
+                <div class="ml-1">조회</div>
+              </v-btn>
+            </v-col>
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       @click="addPopup.show=true"
@@ -17,7 +33,7 @@
                 <div class="ml-1">추가</div>
               </v-btn>
             </v-col>
-            <v-col cols="2">
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       class="m-left">
@@ -29,14 +45,15 @@
         </v-card>
 
         <v-data-table
-          :headers="sensor.headers"
-          :items="sensor.data"
-          :loading="sensor.loading"
-          :options.sync="sensor.options"
-          :server-items-length="sensor.total"
+          :headers="receiver.headers"
+          :items="receiver.data"
+          :loading="receiver.loading"
+          :options.sync="receiver.options"
+          :server-items-length="receiver.total"
+          :search="receiver.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
-          @click:row="popupSensorData"
+          @click:row="popupReceiverData"
           class="elevation-1 mt-4 clickable-row">
           <template v-slot:[`item.delete`]="{item}">
             <v-btn depressed small color="deep-orange accent-4"
@@ -97,7 +114,7 @@
               <v-btn color="primary"
                       class="flex-grow-1 ml-2"
                       dark depressed
-                      @click="addSensor()">
+                      @click="addReceiver()">
                 추가  
               </v-btn>
             </v-card-action>
@@ -153,7 +170,7 @@
               <v-btn color="primary"
                       class="flex-grow-1 ml-2"
                       dark depressed
-                      @click="modifySensorData()">
+                      @click="modifyReceiverData()">
                 수정  
               </v-btn>
             </v-card-action>
@@ -175,7 +192,7 @@
               <v-btn color="primary"
                       class="flex-grow-1 ml-2"
                       dark depressed
-                      @click="deleteSensor()">
+                      @click="deleteReceiver()">
                 삭제  
               </v-btn>
             </v-card-action>
@@ -193,48 +210,52 @@ export default {
   },
   components: {},
   methods: {
-    async getSensor() {
+    async getReceiver() {
 
       let {data} = await this.$http.get("receiver")
-      this.sensor.data = data.objects;
+      this.receiver.data = data.objects;
     },
-    async addSensor() {
-      // 2번 호출되서 서버에 objectDeletedError 뜸
+    async addReceiver() {
       let param = this.addPopup.form;
       await this.$http.post("receiver", param)
-      this.getSensor()
+      this.getReceiver()
       this.addPopup.show = false;
     },
-    popupSensorData(e, {item}) {
+    popupReceiverData(e, {item}) {
       this.infoPopup.form = item;
       this.infoPopup.show = true;
     },
-    async modifySensorData() {
+    async modifyReceiverData() {
       let param = this.infoPopup.form;
       delete param.customer;
       await this.$http.patch(`receiver/${param.id}`, param)
-      this.getSensor()
+      this.getReceiver()
       this.infoPopup.show = false;
     },
     openDeletePopup(item) {
       this.deletePopup.delTarget = item.id;
       this.deletePopup.show = true;
     },
-    async deleteSensor() {
+    async deleteReceiver() {
       let param = this.deletePopup.delTarget;
       await this.$http.delete(`receiver/${param}`)
-      this.getSensor()
+      this.getReceiver()
       this.deletePopup.show = false;
     }
   },
   mounted() {
-    this.getSensor()
+    this.getReceiver()
   },
   watch: {
+    "receiver.options": {
+      handler() {
+      },
+      deep: true,
+    },
   },
   data() {
     return {
-      sensor: {
+      receiver: {
         headers: [
           {text: '수신기 식별자', value: 'receiver_idx', sortable: false,align: 'center', width: 80},
           {text: "고객 식별자", value: "fk_customer_idx",align: 'center', sortable: false, width: 60},
@@ -243,8 +264,9 @@ export default {
           {text: "삭제 여부", value: "delete",align: 'center', sortable: false, width: 20},
         ],
         data: [],
-        options: {},
+        options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
+        search: '',
       },
       loading: false,
       addPopup: {

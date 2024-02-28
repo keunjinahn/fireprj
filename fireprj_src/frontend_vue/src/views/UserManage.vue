@@ -8,13 +8,37 @@
 
         <v-card flat>
           <v-toolbar rounded dense class="elevation-1">
-            <v-col cols="10"></v-col>
-            <v-col cols="2">
+            <v-col cols="5">
+              <v-text-field outlined dense hide-details
+                            placeholder="사용자 검색"
+                            append-icon="mdi-magnify"
+                            v-model="users.search"
+                            @keydown.enter="getUser()"
+                            class="m-right"
+              />
+            </v-col>
+            <v-col cols="1">
+              <v-btn depressed dark big
+                      color="light-blue darken-2"
+                      @click="getUser()">
+                
+                <div class="ml-1">조회</div>
+              </v-btn>
+            </v-col>
+            <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
                       @click="addPopup.show=true"
                       class="m-left">
                 <div class="ml-1">추가</div>
+              </v-btn>
+            </v-col>
+            <v-col cols="1">
+              <v-btn depressed dark big
+                      color="light-blue darken-2"
+                      class="m-left">
+                <v-icon small>mdi-arrow-down-bold-outline</v-icon>
+                <div class="ml-1">xls 다운로드</div>
               </v-btn>
             </v-col>
           </v-toolbar>
@@ -26,6 +50,7 @@
           :loading="users.loading"
           :options.sync="users.options"
           :server-items-length="users.total"
+          :search="users.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           @click:row="popupUserData"
@@ -238,6 +263,11 @@ export default {
     this.getUser()
   },
   watch: {
+    "users.options": {
+      handler() {
+      },
+      deep: true,
+    },
   },
   data() {
     return {
@@ -251,8 +281,9 @@ export default {
           {text: "삭제 여부", value: "delete",align: 'center', sortable: false, width: 20},
         ],
         data: [],
-        options: {"page":1,"itemsPerPage":5,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
+        options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
+        search: '',
       },
       loading: false,
       addPopup: {
