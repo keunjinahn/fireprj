@@ -60,7 +60,7 @@ manager.create_api(FireSensorTbl
                        'GET_MANY': [get_realtime_sensor]
                    })
 
-manager.create_api(EventLogTbl
+manager.create_api(EventTbl
                    , results_per_page=10000
                    , url_prefix='/api/v1'
                    , collection_name='event_list'
