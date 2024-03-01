@@ -6,9 +6,9 @@
           <v-toolbar-title>사용자 관리</v-toolbar-title>
         </v-toolbar>
 
-        <v-card flat>
-          <v-toolbar rounded dense class="elevation-1">
-            <v-col cols="5">
+        <v-card flat height="100">
+          <v-toolbar rounded dense class="elevation-1" height="100">
+            <v-col cols="7">
               <v-text-field outlined dense hide-details
                             placeholder="사용자 검색"
                             append-icon="mdi-magnify"
