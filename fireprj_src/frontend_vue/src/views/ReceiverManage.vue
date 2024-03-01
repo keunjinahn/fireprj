@@ -253,14 +253,29 @@ export default {
     },
     async getReceiver() {
 
-      let {data} = await this.$http.get("receiver")
+      let filters_or = []
+      let filters_and = []
+      let order_by = []
+
+      order_by.push({field: 'id', direction: 'desc'})
+
+      let q = {
+        filters: [{or: filters_or}, {and: filters_and}],
+        order_by
+      }
+      let params = {
+        q: q,
+      };
+
+      let {data} = await this.$http.get("receiver", {params})
       this.receiver.data = data.objects;
     },
     async addReceiver() {
       
       let param = {
         fk_customer_idx:this.addPopup.form.customer_idx,
-        receiver_idx: String(this.addPopup.form.customer_idx).padStart(5,'0') + "_" + String(this.addPopup.form.receiver_type).padStart(3,'0') + "_" + String(this.addPopup.form.receiver_id).padStart(3,'0'),
+        receiver_idx: String(this.addPopup.form.customer_idx).padStart(5,'0') + "_" + String(this.addPopup.form.receiver_type).padStart(3,'0') 
+        + "_" + String(this.addPopup.form.receiver_id).padStart(3,'0'),
         receiver_type:this.addPopup.form.receiver_type,
         receiver_id:this.addPopup.form.receiver_id,
       };
