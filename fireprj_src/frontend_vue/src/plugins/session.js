@@ -133,7 +133,19 @@ export default new Vue({
       //return 'http://localhost:8080'
       // return 'http://118.128.43.7:30443'
       return 'https://kodis.or.kr:50443'
-    }
+    },
+    async setToken (user) {
+      this.$http.defaults.headers.common['token'] = user.token
+      sessionStorage.setItem('user', JSON.stringify(user))
+      this.authorized = true
+      this.user = user
+    },
+    unsetToken () {
+        delete this.$http.defaults.headers.common['token']
+        sessionStorage.removeItem('user')
+        this.authorized = false
+        this.user = null
+    },    
   },
   created() {
 

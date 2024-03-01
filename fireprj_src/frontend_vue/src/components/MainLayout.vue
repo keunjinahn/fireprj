@@ -2,7 +2,7 @@
   <div class="w-100">
     <v-app-bar app clipped-left dense class="top-menu" color="white" elevation="1">
       <router-link :to="{name: 'sensor_manage'}" class="d-flex align-center">
-        <h1>통합화재감지시스템</h1>
+        <img src="@/assets/logo-black.png" height="40" />
       </router-link>
       <div class="ml-auto d-flex align-center">
         <v-divider vertical/>
@@ -107,7 +107,7 @@
       <v-card>
         <v-card-title>로그아웃 하시겠습니까?</v-card-title>
         <v-card-actions>
-          <v-btn tile depressed class="flex-grow-1" @click="$session.logout()">로그아웃</v-btn>
+          <v-btn tile depressed class="flex-grow-1" @click="$session.logout();">로그아웃</v-btn>
           <v-btn tile depressed class="flex-grow-1" @click="logout_dialog.show = false">취소</v-btn>
         </v-card-actions>
       </v-card>

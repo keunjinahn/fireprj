@@ -3,39 +3,41 @@
     <div class="login-panel">
       <div class="login-panel-inner">
         <div class="login-legend">
-          <h1>login</h1>
+          <h1>리더스테크 통합화재<br> 감지 시스템 플랫폼</h1>
         </div>
         <div class="login-input-wrap">
-          <v-tabs-items v-model="tabs">
-            <v-tab-item value="tab1">
-              <div class="login-inner">
-                <v-form>
-                  <div class="mb-4">
-                    <v-text-field outlined dense hide-details
-                      v-model="form.user_id"
-                      label="아이디"
-                      name="login"
-                      type="text"
-                      prepend-inner-icon="person"
-                      @keypress.enter="login"
-                    />
-                  </div>
-                  <div>
-                    <v-text-field outlined dense hide-details
-                      v-model="form.user_pw"
-                      id="password"
-                      label="비밀번호"
-                      name="password"
-                      prepend-inner-icon="lock"
-                      type="password"
-                      @keypress.enter="login"
-                    />
-                  </div>
-                </v-form>
-              </div>
-            </v-tab-item>
-          </v-tabs-items>
+            <div class="login-inner">
+              <v-form>
+                <div class="mb-4">
+                  <v-text-field outlined dense hide-details
+                    v-model="form.username"
+                    label="아이디"
+                    name="username"
+                    type="text"
+                    prepend-inner-icon="person"
+                    @keypress.enter="login"
+                  />
+                </div>
+                <div>
+                  <v-text-field outlined dense hide-details
+                    v-model="form.password"
+                    id="password"
+                    label="비밀번호"
+                    name="password"
+                    prepend-inner-icon="lock"
+                    type="password"
+                    @keypress.enter="login"
+                  />
+                </div>
+                <br>
+                <div class="mb-4 btn-center">
+                  <v-btn width="250" height="50" color="primary" @click="login" :loading="loading">로그인</v-btn>
+                </div>                
+              </v-form>
+            </div>
+        
         </div>
+     
       </div>
     </div>
   </div>
@@ -45,31 +47,42 @@
 export default {
   methods: {
     async login() {
-      let data = {
-        'user': {
-          'token': '1234'
+      if (!this.form.username || !this.form.password)
+        return (this.error = '아이디와 패스워드를 입력해 주세요.')
+
+      this.loading = true
+      try {
+        let {data} = await this.$http.post('login', this.form)
+        if (data.status) {
+          this.$session.login(data)
+          await this.$session.setToken(data.user)
+          this.$router.push('/manage/sensor_manage')
+        }else {
+          if (data.reason == 1) {
+            alert('로그인이 실패(아이디를 확인하여주세요!)')
+          } else if (data.reason == 2) {
+            alert('로그인이 실패(패스워드를 확인하여주세요!)')
+          }
         }
+        return data
       }
-      await this.$session.login(data);
+      catch (err) {
+        this.error = err.message
+      }
+      finally {
+        this.loading = false
+      }
       this.$router.replace({name: 'sensor_manage'})
     }
   },
   data(){
     return {
-      // loading: false,
+      loading: false,
       form: {
-        user_id: "",
-        user_pw: "",
-
+        username: '',
+        password: ''
       },
-      // notices: [],
-      // popup: {
-      //   show: false,
-      //   data: null
-      // },
-      // remember: false,
-      // autologin: false,
-      tabs: 'tab1'
+      error: null,
     };
   }
 }
@@ -184,5 +197,8 @@ export default {
 .gif-center{
   display: block;
   margin: 0 auto;
+}
+.btn-center{
+  text-align: center;
 }
 </style>

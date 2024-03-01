@@ -17,6 +17,7 @@ import MainLayout from '@/components/MainLayout'
 import 'moment/locale/ko'
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import AblDocument from "@/components/AblDocument";
 Vue.config.productionTip = false
 
 Highcharts.setOptions({
@@ -33,6 +34,7 @@ Vue.use(http)
 Vue.use(Session)
 Vue.use(HighchartsVue)
 Vue.use(VueSweetalert2)
+Vue.use(AblDocument)
 //Vue.prototype.$control = Control
 Vue.prototype.$session = Session
 Vue.filter("makeComma", val =>{

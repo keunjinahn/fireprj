@@ -304,4 +304,5 @@ export default {
   .s-h-4-2 {background-color: white;border-bottom: 0px solid #a0a0a0;width:100%;height:60px!important;}
 }
 
+
 </style>

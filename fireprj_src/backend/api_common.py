@@ -81,6 +81,14 @@ manager.create_api(UserTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)
 
+manager.create_api(CustomerTbl
+                   , results_per_page=10000
+                   , url_prefix='/api/v1'
+                   , collection_name='customer'
+                   , methods=['GET', 'DELETE', 'PATCH', 'POST']
+                   , allow_patch_many=True)
+
+
 @app.route('/make-data/event-list', methods=['GET'])
 def write_event_list_api():
     file_path = 'C:\\Users\\ansieun\\project\\fireprj\\doc\\화재감시시스템 이벤트 리스트_20240215.xlsx'
@@ -143,3 +151,81 @@ def generate_sensor_api():
 
     db.session.commit()
     return make_response(jsonify(''), 200)
+
+@app.route('/api/v1/login', methods=['POST'])
+def login_api():
+    data = json.loads(request.data)
+    result = ''
+    print("111")
+    if data['username'] is not None and data['password'] is not None:
+        loginuser = db.session.query(UserTbl).filter(UserTbl.user_id == data["username"]).first()
+
+        if loginuser is None:
+            result = {'status': False, 'reason': 1}  # ID 없음
+        else:
+            if loginuser.user_pwd != password_encoder_512(data["password"]):
+                result = {'status': False, 'reason': 2} # PW 틀림
+                print("222")
+            else:  # Login 성공
+                if loginuser.user_status == 2:
+                    result = {'status': False, 'reason': 3}  # Activation 안됨
+                else:
+                    print("333")
+                    loginuser.token = generate_token(data['username'])
+                    db.session.query(UserTbl).filter(UserTbl.user_id == data["username"])\
+                        .update(dict(token=loginuser.token))
+                    db.session.commit()
+
+                    result = {'status': True, 'reason': 0, 'user': loginuser.serialize()}
+    print("444:",result)
+    return make_response(jsonify(result), 200)
+
+@app.route("/api/v1/logout", methods=["POST"])
+def logout_api():
+    parser = reqparse.RequestParser()
+    parser.add_argument("token", type=str, location="headers")
+    token = parser.parse_args()["token"]
+    result = ''
+    if token is None:
+        print("token is none")
+
+    loginUser = UserTbl.query.filter_by(token=token).first()
+    if loginUser is None:
+        print("user is none")
+
+    return make_response(jsonify(result), 200)
+
+def generate_token(userID):
+    m = hashlib.sha1()
+
+    m.update(userID.encode('utf-8'))
+    m.update(datetime.now().isoformat().encode('utf-8'))
+
+    return m.hexdigest()
+
+def check_token(search_params=None, **kw):
+    parser = reqparse.RequestParser()
+    parser.add_argument("token", type=str, location="headers")
+    token = parser.parse_args()["token"]
+    if token is None:
+        raise ProcessingException(description="Not Authorized", code=410)
+    user = UserTbl.query.filter_by(token=token).first()
+    if user is None:
+        raise ProcessingException(description="Not Authorized", code=411)
+
+def check_token_single(search_params=None, **kw):
+    parser = reqparse.RequestParser()
+    parser.add_argument("token", type=str, location="headers")
+    token = parser.parse_args()["token"]
+
+    if token is None:
+        raise ProcessingException(description="Not Authorized", code=410)
+
+    user = UserTbl.query.filter_by(token=token).first()
+    if user is None:
+        raise ProcessingException(description="Not Authorized", code=411)
+
+def password_encoder_512(password):
+    h = hashlib.sha512()
+    h.update(password.encode('utf-8'))
+    return h.hexdigest()

@@ -79,3 +79,14 @@ class UserTbl(db.Model):
     user_name = db.Column('user_name', db.String(45))
     user_status = db.Column('user_status', db.Integer, default='1')
     user_role = db.Column('user_role', db.Integer, default='1')
+    token = db.Column('token', db.String(128))  # added
+    def serialize(self):
+        resultJSON = {
+            # property (a)
+            "id": self.id
+            , "user_id": self.user_id
+            , "user_name": self.user_name
+            , "user_status": self.user_status
+            , "token": self.token
+        }
+        return resultJSON    

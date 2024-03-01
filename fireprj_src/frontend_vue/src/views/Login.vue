@@ -2,7 +2,7 @@
   <v-main class="login-main">
     <v-container class="fill-height" color="transparent" fluid>
       <v-row align="center" justify="center">
-        <v-col cols="12" sm="12" md="7">
+        <v-col cols="12" sm="12" md="3">
           <div class="login-container">
             <router-view />
           </div>

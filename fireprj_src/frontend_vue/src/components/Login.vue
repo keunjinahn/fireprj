@@ -5,7 +5,7 @@
         <v-col cols="12" sm="8" md="4">
           <v-card class="elevation-12">
             <v-toolbar color="blue darken-2" dark flat dense>
-              <v-toolbar-title>태풍 예측 시스템 로그인</v-toolbar-title>
+              <v-toolbar-title>리더스테크 통합화재감시시스템 플랫폼</v-toolbar-title>
             </v-toolbar>
             <v-card-text>
               <v-form>
