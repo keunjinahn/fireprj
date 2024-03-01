@@ -21,31 +21,31 @@ USE `fireprjdb`;
 
 -- 테이블 fireprjdb.customer_tbl 구조 내보내기
 CREATE TABLE IF NOT EXISTS `customer_tbl` (
-  `customer_idx` smallint(5) unsigned zerofill NOT NULL AUTO_INCREMENT,
-  `customer_name` varchar(45) NOT NULL,
-  `customer_tel` varchar(12) NOT NULL,
-  `customer_address` varchar(45) NOT NULL,
+  `customer_idx` int(11) unsigned NOT NULL DEFAULT 0,
+  `customer_name` varchar(100) NOT NULL,
+  `customer_tel` varchar(15) NOT NULL,
+  `customer_address` varchar(1000) NOT NULL,
   PRIMARY KEY (`customer_idx`),
   UNIQUE KEY `customer_idx_UNIQUE` (`customer_idx`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 테이블 데이터 fireprjdb.customer_tbl:~2 rows (대략적) 내보내기
 INSERT INTO `customer_tbl` (`customer_idx`, `customer_name`, `customer_tel`, `customer_address`) VALUES
-	(00001, '1', '1', '1'),
-	(00002, '2', '2', '2');
+	(1, '뉴럴테크', '041-1234-1234', '충청남도 천안시 불당동 12번지'),
+	(2, '시성모바일', '010-3353-9470', '경기도 부천시 상동 134');
 
 -- 테이블 fireprjdb.event_log_tbl 구조 내보내기
 CREATE TABLE IF NOT EXISTS `event_log_tbl` (
   `event_log_idx` bigint(20) NOT NULL AUTO_INCREMENT,
-  `fk_customer_idx` smallint(5) unsigned zerofill NOT NULL,
-  `event_id` tinyint(3) unsigned zerofill NOT NULL,
-  `receiver_type` tinyint(2) unsigned zerofill NOT NULL,
-  `receiver_id` tinyint(2) unsigned zerofill NOT NULL,
-  `system_id` tinyint(2) unsigned zerofill NOT NULL DEFAULT 00,
-  `repeater_id` tinyint(2) unsigned zerofill NOT NULL,
-  `sensor_id` tinyint(2) unsigned zerofill NOT NULL,
+  `fk_customer_idx` int(11) unsigned NOT NULL DEFAULT 0,
+  `event_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `receiver_type` int(11) unsigned NOT NULL DEFAULT 0,
+  `receiver_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `system_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `repeater_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `sensor_id` int(11) unsigned NOT NULL DEFAULT 0,
   `sensor_value` varchar(50) NOT NULL DEFAULT '0',
-  `inout_id` tinyint(2) unsigned zerofill NOT NULL DEFAULT 00,
+  `inout_id` int(11) unsigned NOT NULL DEFAULT 0,
   `event_datetime` datetime NOT NULL,
   PRIMARY KEY (`event_log_idx`),
   UNIQUE KEY `event_log_idx_UNIQUE` (`event_log_idx`)
@@ -314,112 +314,90 @@ INSERT INTO `event_tbl` (`id`, `event_idx`, `system_id_c`, `repeater_id_c`, `sen
 -- 테이블 fireprjdb.fire_receiver_tbl 구조 내보내기
 CREATE TABLE IF NOT EXISTS `fire_receiver_tbl` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `receiver_idx` char(11) NOT NULL,
-  `fk_customer_idx` smallint(5) unsigned zerofill NOT NULL,
-  `receiver_type` tinyint(3) unsigned zerofill NOT NULL,
-  `receiver_id` tinyint(3) unsigned zerofill NOT NULL,
+  `receiver_idx` varchar(20) NOT NULL DEFAULT '',
+  `fk_customer_idx` int(11) unsigned NOT NULL DEFAULT 0,
+  `receiver_type` int(11) unsigned NOT NULL DEFAULT 0,
+  `receiver_id` int(11) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 테이블 데이터 fireprjdb.fire_receiver_tbl:~2 rows (대략적) 내보내기
 INSERT INTO `fire_receiver_tbl` (`id`, `receiver_idx`, `fk_customer_idx`, `receiver_type`, `receiver_id`) VALUES
-	(1, '001', 00001, 001, 001),
-	(2, '002', 00001, 001, 002);
+	(1, '00001_001_001', 1, 1, 1),
+	(2, '00001_001_002', 1, 1, 2);
 
 -- 테이블 fireprjdb.fire_repeater_tbl 구조 내보내기
 CREATE TABLE IF NOT EXISTS `fire_repeater_tbl` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `repeater_idx` char(11) NOT NULL,
-  `fk_customer_idx` smallint(5) unsigned zerofill NOT NULL,
-  `receiver_id` tinyint(3) unsigned zerofill NOT NULL,
-  `system_id` tinyint(3) unsigned zerofill NOT NULL DEFAULT 000,
-  `repeater_id` tinyint(3) unsigned zerofill NOT NULL,
+  `repeater_idx` varchar(50) NOT NULL DEFAULT '',
+  `fk_customer_idx` int(11) unsigned NOT NULL DEFAULT 0,
+  `receiver_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `system_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `repeater_id` int(11) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 테이블 데이터 fireprjdb.fire_repeater_tbl:~48 rows (대략적) 내보내기
+-- 테이블 데이터 fireprjdb.fire_repeater_tbl:~4 rows (대략적) 내보내기
 INSERT INTO `fire_repeater_tbl` (`id`, `repeater_idx`, `fk_customer_idx`, `receiver_id`, `system_id`, `repeater_id`) VALUES
-	(1, '001', 00001, 001, 000, 001),
-	(2, '002', 00001, 001, 000, 002),
-	(3, '003', 00001, 001, 000, 003),
-	(4, '004', 00001, 001, 000, 004),
-	(5, '005', 00001, 001, 000, 005),
-	(6, '006', 00001, 001, 000, 006),
-	(7, '007', 00001, 001, 000, 007),
-	(8, '008', 00001, 001, 000, 008),
-	(9, '009', 00001, 001, 000, 009),
-	(10, '010', 00001, 001, 000, 010),
-	(11, '011', 00001, 001, 000, 011),
-	(12, '012', 00001, 001, 000, 012),
-	(13, '013', 00001, 001, 000, 013),
-	(14, '014', 00001, 001, 000, 014),
-	(15, '015', 00001, 001, 000, 015),
-	(16, '016', 00001, 001, 000, 016),
-	(17, '017', 00001, 001, 000, 017),
-	(18, '018', 00001, 001, 000, 018),
-	(19, '019', 00001, 001, 000, 019),
-	(20, '020', 00001, 001, 000, 020),
-	(21, '021', 00001, 001, 000, 021),
-	(22, '022', 00001, 001, 000, 022),
-	(23, '023', 00001, 001, 000, 023),
-	(24, '024', 00001, 001, 000, 024),
-	(25, '025', 00001, 002, 000, 025),
-	(26, '026', 00001, 002, 000, 026),
-	(27, '027', 00001, 002, 000, 027),
-	(28, '028', 00001, 002, 000, 028),
-	(29, '029', 00001, 002, 000, 029),
-	(30, '030', 00001, 002, 000, 030),
-	(31, '031', 00001, 002, 000, 031),
-	(32, '032', 00001, 002, 000, 032),
-	(33, '033', 00001, 002, 000, 033),
-	(34, '034', 00001, 002, 000, 034),
-	(35, '035', 00001, 002, 000, 035),
-	(36, '036', 00001, 002, 000, 036),
-	(37, '037', 00001, 002, 000, 037),
-	(38, '038', 00001, 002, 000, 038),
-	(39, '039', 00001, 002, 000, 039),
-	(40, '040', 00001, 002, 000, 040),
-	(41, '041', 00001, 002, 000, 041),
-	(42, '042', 00001, 002, 000, 042),
-	(43, '043', 00001, 002, 000, 043),
-	(44, '044', 00001, 002, 000, 044),
-	(45, '045', 00001, 002, 000, 045),
-	(46, '046', 00001, 002, 000, 046),
-	(47, '047', 00001, 002, 000, 047),
-	(48, '048', 00001, 002, 000, 048);
+	(1, '00001_001_000_001', 1, 1, 0, 1),
+	(2, '00001_001_000_002', 1, 1, 0, 2),
+	(3, '00001_002_000_003', 1, 2, 0, 3),
+	(4, '00001_002_000_004', 1, 2, 0, 4);
 
 -- 테이블 fireprjdb.fire_sensor_tbl 구조 내보내기
 CREATE TABLE IF NOT EXISTS `fire_sensor_tbl` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `sensor_idx` char(17) NOT NULL,
-  `fk_customer_idx` smallint(5) unsigned zerofill NOT NULL,
-  `receiver_id` tinyint(3) unsigned zerofill NOT NULL,
-  `system_id` tinyint(3) unsigned zerofill NOT NULL DEFAULT 000,
-  `repeater_id` tinyint(3) unsigned zerofill NOT NULL,
-  `sensor_id` tinyint(3) unsigned zerofill NOT NULL,
+  `sensor_idx` varchar(50) NOT NULL DEFAULT '',
+  `fk_customer_idx` int(11) unsigned NOT NULL DEFAULT 0,
+  `receiver_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `system_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `repeater_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `sensor_id` int(11) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 테이블 데이터 fireprjdb.fire_sensor_tbl:~0 rows (대략적) 내보내기
+-- 테이블 데이터 fireprjdb.fire_sensor_tbl:~20 rows (대략적) 내보내기
+INSERT INTO `fire_sensor_tbl` (`id`, `sensor_idx`, `fk_customer_idx`, `receiver_id`, `system_id`, `repeater_id`, `sensor_id`) VALUES
+	(1, '00001_001_000_001_001', 1, 1, 0, 1, 1),
+	(2, '00001_001_000_001_002', 1, 1, 0, 1, 2),
+	(3, '00001_001_000_001_003', 1, 1, 0, 1, 3),
+	(4, '00001_001_000_001_004', 1, 1, 0, 1, 4),
+	(5, '00001_001_000_001_005', 1, 1, 0, 1, 5),
+	(6, '00001_001_000_002_006', 1, 1, 0, 2, 6),
+	(7, '00001_001_000_002_007', 1, 1, 0, 2, 7),
+	(8, '00001_001_000_002_008', 1, 1, 0, 2, 8),
+	(9, '00001_001_000_002_009', 1, 1, 0, 2, 9),
+	(10, '00001_001_000_002_010', 1, 1, 0, 2, 10),
+	(11, '00001_002_000_003_011', 1, 2, 0, 3, 11),
+	(12, '00001_002_000_003_012', 1, 2, 0, 3, 12),
+	(13, '00001_002_000_003_013', 1, 2, 0, 3, 13),
+	(14, '00001_002_000_003_014', 1, 2, 0, 3, 14),
+	(15, '00001_002_000_003_015', 1, 2, 0, 3, 15),
+	(16, '00001_002_000_004_016', 1, 2, 0, 4, 16),
+	(17, '00001_002_000_004_017', 1, 2, 0, 4, 17),
+	(18, '00001_002_000_004_018', 1, 2, 0, 4, 18),
+	(19, '00001_002_000_004_019', 1, 2, 0, 4, 19),
+	(20, '00001_002_000_004_020', 1, 2, 0, 4, 20);
 
 -- 테이블 fireprjdb.user_tbl 구조 내보내기
 CREATE TABLE IF NOT EXISTS `user_tbl` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(10) NOT NULL,
-  `user_pwd` varchar(10) NOT NULL,
+  `user_pwd` varchar(1024) NOT NULL,
   `user_name` varchar(45) NOT NULL,
-  `user_status` tinyint(1) NOT NULL DEFAULT 1,
-  `user_role` tinyint(1) NOT NULL DEFAULT 1,
+  `user_status` int(11) NOT NULL DEFAULT 1,
+  `user_role` int(11) NOT NULL DEFAULT 1,
+  `token` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 테이블 데이터 fireprjdb.user_tbl:~1 rows (대략적) 내보내기
-INSERT INTO `user_tbl` (`id`, `user_id`, `user_pwd`, `user_name`, `user_status`, `user_role`) VALUES
-	(1, '1', '1', '1', 1, 1);
+INSERT INTO `user_tbl` (`id`, `user_id`, `user_pwd`, `user_name`, `user_status`, `user_role`, `token`) VALUES
+	(1, 'admin', 'daef4953b9783365cad6615223720506cc46c5167cd16ab500fa597aa08ff964eb24fb19687f34d7665f778fcb6c5358fc0a5b81e1662cf90f73a2671c53f991', '관리자', 1, 1, 'c3a4ae80f7b692a341483ea57793a3e04b1c990b');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

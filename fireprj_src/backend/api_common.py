@@ -122,42 +122,53 @@ def write_event_list_api():
     db.session.commit()
     return make_response(jsonify(''), 200)
 
-@app.route('/make-data/generate_repeater', methods=['GET'])
-def generate_repeater_api():
-    receiver_data = FireReceiverTbl.query.all()
+@app.route('/make-data/generating', methods=['POST'])
+def generating_api():
+    generate_option = json.loads(request.data)
 
-    for i, receiver in enumerate(receiver_data):
-        for j in range(24):
-            obj = FireRepeaterTbl()
-            setattr(obj, 'repeater_idx', f'{(i*24)+(j+1):0>3}')
-            setattr(obj, 'fk_customer_idx', 1)                      #고객식별자: 00001
-            setattr(obj, 'receiver_id', receiver.receiver_id)
-            setattr(obj, 'system_id', 0)                        #계통번호: 00
-            setattr(obj, 'repeater_id', (i*24)+(j+1))
-            db.session.add(obj)
-    db.session.commit()
-    return make_response(jsonify(''), 200)
-
-@app.route('/make-data/generate_sensor', methods=['GET'])
-def generate_sensor_api():
-    repeater_data = FireRepeaterTbl.query.all()
-
-    for i, repeater in enumerate(repeater_data):
-        for j in range(24):
-            obj = FireSensorTbl()
-            setattr(obj, 'sensor_idx', (i*24)+(j+1))
-            setattr(obj, 'fk_customer_idx', 1)                      #고객식별자: 00001
-            setattr(obj, 'receiver_id', repeater.receiver_id)
-            setattr(obj, 'system_id', 0)                        #계통번호: 00
-            setattr(obj, 'repeater_id', repeater.repeater_id)
-            setattr(obj, 'sensor_id', (i*24)+(j+1))
-            db.session.add(obj)
-        
-        # 데이터 많아서 안들어감: 2*24*24 = 1152
+    if 'receiver' in generate_option:
+        receiver_len = generate_option['receiver']
+        for i in range(receiver_len):
+            receiver_id = i+1
+            db.session.add(FireReceiverTbl(
+                receiver_idx    = f'00001_001_{receiver_id:0>3}',
+                fk_customer_idx = 1,                        #고객식별자: 1
+                receiver_type   = 1,                        #수신기 타입: 1
+                receiver_id     = receiver_id
+            ))
         db.session.commit()
-        if i > 2: break
 
-    db.session.commit()
+    if 'repeater' in generate_option:
+        repeater_len = generate_option['repeater']
+        receiver_data = FireReceiverTbl.query.all()
+        for i, receiver in enumerate(receiver_data):
+            for j in range(repeater_len):
+                repeater_id = (i*repeater_len) + (j+1)
+                db.session.add(FireRepeaterTbl(
+                    repeater_idx    = f'00001_{receiver.receiver_id:0>3}_000_{repeater_id:0>3}',
+                    fk_customer_idx = 1,                    #고객식별자: 1
+                    receiver_id     = receiver.receiver_id,
+                    system_id       = 0,                    #계통번호: 0
+                    repeater_id     = repeater_id,
+                ))
+        db.session.commit()
+
+    if 'sensor' in generate_option:
+        sensor_len = generate_option['sensor']
+        repeater_data = FireRepeaterTbl.query.all()
+        for i, repeater in enumerate(repeater_data):
+            for j in range(sensor_len):
+                sensor_id = (i*sensor_len) + (j+1)
+                db.session.add(FireSensorTbl(
+                    sensor_idx      = repeater.repeater_idx + f'_{sensor_id:0>3}',
+                    fk_customer_idx = 1,                    #고객식별자: 1
+                    receiver_id     = repeater.receiver_id,
+                    system_id       = 0,                    #계통번호: 0
+                    repeater_id     = repeater.repeater_id,
+                    sensor_id       = sensor_id,
+                ))
+        db.session.commit()
+
     return make_response(jsonify(''), 200)
 
 @app.route('/api/v1/login', methods=['POST'])
