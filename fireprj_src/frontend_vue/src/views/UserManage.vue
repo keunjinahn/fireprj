@@ -28,7 +28,7 @@
             <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
-                      @click="addPopup.show=true"
+                      @click="openAddPopup()"
                       class="m-left">
                 <div class="ml-1">추가</div>
               </v-btn>
@@ -53,9 +53,23 @@
           :search="users.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
-          @click:row="popupUserData"
           class="elevation-1 mt-4 clickable-row">
+          <template v-slot:[`item.user_pwd`]="{item}">
+            *****
+          </template>           
+          <template v-slot:[`item.user_status`]="{item}">
+            {{user_status_list.find(v=>v.code==item.user_status).name}}
+          </template>           
+          <template v-slot:[`item.user_role`]="{item}">
+            {{user_role_list.find(v=>v.code==item.user_role).name}}
+          </template>                     
           <template v-slot:[`item.delete`]="{item}">
+            <v-btn depressed small color="#aaaaaa"
+                    dark class="ml-1"
+                    @click.stop
+                    @click="openModifyPopup(item)">
+              수정
+            </v-btn>            
             <v-btn depressed small color="deep-orange accent-4"
                     dark class="ml-1"
                     @click.stop
@@ -65,132 +79,94 @@
           </template>
         </v-data-table>
 
-        <v-dialog v-model="addPopup.show" persistent max-width="600px">
-          <v-card>
+        <v-dialog v-model="addPopup.show" persistent max-width="500px">
+          <v-card :loading="loading" :disabled="loading">
             <v-card-title class="pt-2 pb-1 primary white--text">
-              <span class="body-1">사용자 추가</span>
+              <span class="body-1">{{(addPopup.popup_type == 'ADD')? '사용자 등록':'사용자 수정'}}</span>
             </v-card-title>
+            <v-divider />
             <v-card-text>
               <v-container>
-                <v-row>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 식별자"
-                                  placeholder="사용자 식별자"
-                                  v-model="addPopup.form.user_id"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 비밀번호"
-                                  placeholder="사용자 비밀번호"
-                                  v-model="addPopup.form.user_pwd"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 성명"
-                                  placeholder="사용자 성명"
-                                  v-model="addPopup.form.user_name"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 상태"
-                                  placeholder="사용자 상태"
-                                  v-model="addPopup.form.user_status"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 권한"
-                                  placeholder="사용자 권한"
-                                  v-model="addPopup.form.user_role"
-                    />
-                  </v-col>
-                </v-row>
+                <v-card>
+                  <abl-document class="abl-page-popup" ref="report-popup">
+                    <abl-doc-body class="abl-doc-body-popup">
+                      <table class="abl-table-ts-popup">
+                        <colgroup>
+                          <col style="width: 25%" />
+                        </colgroup>
+                        <tr>
+                            <th class="s-h" colspan="2" rowspan="1">사용자 식별자</th>
+                            <td colspan="2">
+                               <input type="text" placeholder="영문 아이디" class="abl-input" v-model="addPopup.form.user_id"/>
+                            </td>
+                        </tr>          
+                        <tr>
+                          <th class="s-h" colspan="2" rowspan="1">사용자 비밀번호</th>
+                          <td colspan="2">
+                            <input type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd"/>
+                          </td>
+                        </tr>   
+                        <tr>
+                          <th class="s-h" colspan="2" rowspan="1">사용자 성명</th>
+                          <td colspan="2">
+                            <input type="text" placeholder="사용자 성명" class="abl-input" v-model="addPopup.form.user_name"/>
+                          </td>
+                        </tr>   
+                        <tr>
+                          <th class="s-h" colspan="2" rowspan="1">사용자 상태</th>
+                          <td colspan="2">
+                              <v-select dense hide-details
+                                  v-model="addPopup.selected_status"
+                                  :items="user_status_list"
+                                  item-text="name"
+                                  item-value="code"
+                                  @change="onChangeUserStatus"
+                                >
+                              </v-select>
+                          </td>
+                        </tr>     
+                        <tr>
+                          <th class="s-h" colspan="2" rowspan="1">사용자 권한</th>
+                          <td colspan="2">
+                              <v-select dense hide-details
+                                  v-model="addPopup.selected_role"
+                                  :items="user_role_list"
+                                  item-text="name"
+                                  item-value="code"
+                                  @change="onChangeUserRole"
+                                >
+                              </v-select>
+                          </td>
+                        </tr>       
+                      </table>
+                    </abl-doc-body>
+                  </abl-document>                                   
+                </v-card>
               </v-container>
             </v-card-text>
-            <v-card-action>
-              <v-btn color="light-blue darken-2"
-                      class="flex-grow-1"
-                      text
-                      @click="addPopup.show=false">
-                취소  
+            <v-card-actions>
+              <v-btn
+                  color="light-blue darken-2"
+                  class="flex-grow-1"
+                  text
+                  @click="addPopup.show=false"
+              >
+                닫기
               </v-btn>
-              <v-btn color="primary"
-                      class="flex-grow-1 ml-2"
-                      dark depressed
-                      @click="addUser()">
-                추가  
+              <v-btn
+                  color="light-blue darken-2"
+                  class="flex-grow-1"
+                  tile
+                  dark
+                  depressed
+                  @click="addUser"
+              >
+              {{(addPopup.popup_type == 'ADD')? '사용자 등록':'사용자 수정'}}
               </v-btn>
-            </v-card-action>
+            </v-card-actions>
           </v-card>
         </v-dialog>
 
-        <v-dialog v-model="infoPopup.show" persistent max-width="600px">
-          <v-card>
-            <v-card-title class="pt-2 pb-1 primary white--text">
-              <span class="body-1">사용자 정보</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 식별자"
-                                  placeholder="사용자 식별자"
-                                  v-model="infoPopup.form.user_id"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 비밀번호"
-                                  placeholder="사용자 비밀번호"
-                                  v-model="infoPopup.form.user_pwd"
-                                  type="password"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 성명"
-                                  placeholder="사용자 성명"
-                                  v-model="infoPopup.form.user_name"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 상태"
-                                  placeholder="사용자 상태"
-                                  v-model="infoPopup.form.user_status"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="사용자 권한"
-                                  placeholder="사용자 권한"
-                                  v-model="infoPopup.form.user_role"
-                    />
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-            <v-card-action>
-              <v-btn color="light-blue darken-2"
-                      class="flex-grow-1"
-                      text
-                      @click="infoPopup.show=false">
-                닫기  
-              </v-btn>
-              <v-btn color="primary"
-                      class="flex-grow-1 ml-2"
-                      dark depressed
-                      @click="modifyUserData()">
-                수정  
-              </v-btn>
-            </v-card-action>
-          </v-card>
-        </v-dialog>
 
         <v-dialog v-model="deletePopup.show" persistent max-width="600px">
           <v-card>
@@ -225,6 +201,39 @@ export default {
   },
   components: {},
   methods: {
+    clearUser() {
+      this.addPopup.form =  {
+          user_id: '',
+          user_pwd: '',
+          user_name: '',
+          user_status: '',
+          user_role: '',
+        }      
+    },
+    openAddPopup() {
+      this.clearUser()
+      this.addPopup.selected_status = this.user_status_list[0]
+      this.addPopup.selected_role = this.user_role_list[0]
+      this.addPopup.popup_type = 'ADD'
+      this.addPopup.show = true
+    },
+    openModifyPopup(item) {
+      this.addPopup.selected_status = this.user_status_list.find(v => v.code == item.user_status)
+      this.addPopup.selected_role = this.user_role_list.find(v => v.code == item.user_role)
+      this.addPopup.form.user_id = item.user_id
+      this.addPopup.form.user_pwd = '*****'
+      this.addPopup.form.user_name = item.user_name
+      this.addPopup.form.id = item.id
+      this.addPopup.popup_type = 'MODIFY'
+      this.addPopup.show = true      
+      
+    },
+    onChangeUserStatus(status) {
+      this.addPopup.form.user_status = status
+    },
+    onChangeUserRole(role) {
+      this.addPopup.form.user_role = role
+    },    
     async getUser() {
 
       let {data} = await this.$http.get("user")
@@ -232,8 +241,18 @@ export default {
     },
     async addUser() {
       // 2번 호출되서 서버에 objectDeletedError 뜸
-      let param = this.addPopup.form;
-      await this.$http.post("user", param)
+      let param = {
+        user_id: this.addPopup.form.user_id,
+        user_pwd: this.addPopup.form.user_pwd,
+        user_name: this.addPopup.form.user_name,
+        user_status: this.addPopup.form.user_status,
+        user_role: this.addPopup.form.user_role,
+      }
+      if (this.addPopup.popup_type == 'ADD') {
+        await this.$http.post("user", param)
+      } else {
+        await this.$http.patch(`user/${this.addPopup.form.id}`, param)  
+      }
       this.getUser()
       this.addPopup.show = false;
     },
@@ -241,13 +260,13 @@ export default {
       this.infoPopup.form = item;
       this.infoPopup.show = true;
     },
-    async modifyUserData() {
-      let param = this.infoPopup.form;
-      delete param.customer;
-      await this.$http.patch(`user/${param.id}`, param)
-      this.getUser()
-      this.infoPopup.show = false;
-    },
+    // async modifyUserData() {
+    //   let param = this.infoPopup.form;
+    //   delete param.customer;
+    //   await this.$http.patch(`user/${param.id}`, param)
+    //   this.getUser()
+    //   this.infoPopup.show = false;
+    // },
     openDeletePopup(item) {
       this.deletePopup.delTarget = item.id;
       this.deletePopup.show = true;
@@ -278,7 +297,7 @@ export default {
           {text: "사용자 성명", value: "user_name",align: 'center', sortable: false, width: 40},
           {text: "사용자 상태", value: "user_status",align: 'center', sortable: false, width: 20},
           {text: "사용자 권한", value: "user_role",align: 'center', sortable: false, width: 20},
-          {text: "삭제 여부", value: "delete",align: 'center', sortable: false, width: 20},
+          {text: "수정/삭제", value: "delete",align: 'center', sortable: false, width: 10},
         ],
         data: [],
         options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
@@ -294,7 +313,12 @@ export default {
           user_name: '',
           user_status: '',
           user_role: '',
-        }
+          id:''
+        },
+        loading:false,
+        popup_type: 'ADD',
+        selected_status: null,
+        selected_role:null
       },
       infoPopup: {
         show: false,
@@ -303,7 +327,15 @@ export default {
       deletePopup: {
         show: false,
         delTarget: ''
-      }
+      },
+      user_status_list: [
+        { name:'미사용',code: 0},        
+        { name: '사용', code: 1 }
+      ],
+      user_role_list: [
+        { name:'조회',code: 0},        
+        { name: '관리', code: 1 }
+      ]      
     };
   },
 };

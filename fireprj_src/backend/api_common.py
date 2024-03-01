@@ -74,12 +74,20 @@ manager.create_api(EventTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)
 
+def prePasswdUpdate(input_params=None, **kw):
+    if 'user_pwd' in kw['data']:
+        kw['data']['user_pwd'] = password_encoder_512(kw['data']['user_pwd'])
+        
 manager.create_api(UserTbl
                    , results_per_page=10000
                    , url_prefix='/api/v1'
                    , collection_name='user'
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
-                   , allow_patch_many=True)
+                   , allow_patch_many=True
+                   , preprocessors={
+                        'POST': [prePasswdUpdate],
+                        'PATCH_SINGLE': [prePasswdUpdate],
+                   })            
 
 manager.create_api(CustomerTbl
                    , results_per_page=10000

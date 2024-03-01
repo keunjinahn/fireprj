@@ -167,62 +167,7 @@
         </v-dialog>
 
 
-         <!-- <v-dialog v-model="infoPopup.show" persistent max-width="600px">
-          <v-card>
-            <v-card-title class="pt-2 pb-1 primary white--text">
-              <span class="body-1">수신기 정보</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="수신기 식별자"
-                                  placeholder="수신기 식별자"
-                                  v-model="infoPopup.form.receiver_idx"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="고객식별자"
-                                  placeholder="고객식별자"
-                                  v-model="infoPopup.form.fk_customer_idx"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="수신기 타입"
-                                  placeholder="수신기 타입"
-                                  v-model="infoPopup.form.receiver_type"
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="6">
-                    <v-text-field outlined dense hide-details
-                                  label="수신기 번호"
-                                  placeholder="수신기 번호"
-                                  v-model="infoPopup.form.receiver_id"
-                    />
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-            <v-card-action>
-              <v-btn color="light-blue darken-2"
-                      class="flex-grow-1"
-                      text
-                      @click="infoPopup.show=false">
-                닫기  
-              </v-btn>
-              <v-btn color="primary"
-                      class="flex-grow-1 ml-2"
-                      dark depressed
-                      @click="modifyReceiverData()">
-                수정  
-              </v-btn>
-            </v-card-action>
-          </v-card>
-        </v-dialog> -->
-
+        
         <v-dialog v-model="deletePopup.show" persistent max-width="600px">
           <v-card>
             <v-card-title>
