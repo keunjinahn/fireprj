@@ -43,10 +43,8 @@
           :loading="sensor.loading"
           :options.sync="sensor.options"
           :server-items-length="sensor.total"
-          :search="sensor.search"
-          :items-per-page="5"
-          :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
-          @click:row="popupSensorData"
+          :items-per-page="20"
+          :footer-props="{'items-per-page-options': [20,40,60,-1]}"
           class="elevation-1 mt-4">
           <template v-slot:item="row">
             <tr >
@@ -73,8 +71,45 @@ export default {
   components: {},
   methods: {
     async getSensor() {
-      let {data} = await this.$http.get("event_list")
-      this.sensor.data = data.objects;
+
+      const { page, itemsPerPage, sortBy, sortDesc } = this.sensor.options;
+      try {
+        let filters_or = []
+        let filters_and = []
+        let order_by = []
+        if (this.sensor.search) {
+          filters_or.push({name: 'event_desc', op: 'like', val: `%${this.sensor.search}%`})
+        }
+        if (sortBy.length) {
+          for (let i=0; i<sortBy.length; i++) {
+            order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
+          }
+        }else{
+          order_by.push({field: "id", direction: 'asc'})
+        }
+
+        let q = {
+          filters: [{or: filters_or}, {and: filters_and}],
+          order_by
+        }
+        let params = {
+          q: q,
+          results_per_page: itemsPerPage,
+          page: page,
+        };
+
+        let { data } = await this.$http.get("event_list", { params });
+        this.sensor.total = data.num_results;
+        this.sensor.data = data.objects.map((v, i) => {
+          v._index = i + (page - 1) * itemsPerPage + 1;
+          return v;
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        this.sensor.loading = false;
+      }      
+       
     },
     popupSensorData(e, {item}) {
       this.infoPopup.form = item;
@@ -118,6 +153,7 @@ export default {
   watch: {
     "sensor.options": {
       handler() {
+        this.getSensor()
       },
       deep: true,
     },
@@ -135,9 +171,10 @@ export default {
           {text: "구분", value: "event_desc",align: 'center', sortable: false, width: 20},
         ],
         data: [],
-        options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
+        options: {"page":1,"itemsPerPage":20,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
         search: '',
+        total:0
       },
       loading: false,
       addPopup: {
