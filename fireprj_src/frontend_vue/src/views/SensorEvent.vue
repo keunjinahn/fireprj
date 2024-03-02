@@ -56,10 +56,22 @@
               <td >{{ row.item.system_id}}</td>
               <td >{{ row.item.repeater_id }}</td>
               <td >{{ row.item.sensor_id }}</td>
-              <td >{{ row.item.regist_status }}</td>
-              <td >{{ row.item.action_status }}</td>
-              <td >{{ row.item.network_status }}</td>
-              <td >{{ row.item.battery_status }}</td>
+              <td>
+                <div v-if="row.item.regist_status" class="normal-circle"></div>
+                <div v-else class="anomal-circle"></div>
+              </td>
+              <td >
+                <div v-if="row.item.action_status" class="normal-circle"></div>
+                <div v-else class="anomal-circle"></div>
+              </td>
+              <td>
+                <div v-if="row.item.network_status" class="normal-circle"></div>
+                <div v-else class="anomal-circle"></div>
+              </td>
+              <td >
+                <div v-if="row.item.battery_status" class="normal-circle"></div>
+                <div v-else class="anomal-circle"></div>
+              </td>              
             </tr>
           </template>
         </v-data-table>
@@ -172,5 +184,27 @@ td {
   margin-left:10px;
   margin-bottom: 10px;
   width:48%;
+}
+
+.normal-circle
+{
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid;
+  background-color: #ff0000;
+  opacity: 0.3;
+  margin: auto;
+  border: 2px solid rgb(0, 0, 0);
+}
+.anomal-circle
+{
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid;
+  background-color: #c8c8c8;
+  opacity: 0.3;
+  margin: auto;
 }
 </style>

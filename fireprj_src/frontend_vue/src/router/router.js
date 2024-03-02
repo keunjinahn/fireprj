@@ -125,6 +125,14 @@ const routes = [{
   props: true,
   beforeEnter
 },
+{
+  path: '/sensor_dashboard',
+  name: 'sensor_dashboard',
+  component: View.SensorDashboard,
+  meta: { breadcrumb: [{ text: '대시보드', disabled: true }, { text: '대시보드', disabled: true }] },
+  props: true,
+  beforeEnter
+},
 ]
 
 const router = new VueRouter({
