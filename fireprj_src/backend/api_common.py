@@ -309,3 +309,23 @@ def make_excel_api():
 def save_excel_api(filename):
     upload_path = os.getcwd() + '/download'
     return send_from_directory(upload_path, filename)
+
+@app.route('/api/v1/sensor-log-chart', methods=['GET'])
+def sensor_log_chart_api():
+    sensor_id = request.args.get('sensor_id')
+    data = EventLogTbl.query.filter_by(sensor_id=sensor_id)\
+        .order_by(EventLogTbl.event_datetime.desc())\
+        .offset(0).limit(10).all()
+    values = []
+    dates = []
+    for d in data:
+        values.append(float(d.sensor_value))
+        dates.append(d.event_datetime)
+    values = values[::-1]
+    dates = dates[::-1]
+
+    obj = {
+        "objects": values,
+        "dates": dates
+    }
+    return make_response(jsonify(obj), 200)

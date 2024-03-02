@@ -45,10 +45,9 @@
           :search="sensor.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
-          @click:row="popupSensorData"
           class="elevation-1 mt-4">
           <template v-slot:item="row">
-            <tr >
+            <tr class="clickable-row" @click="chart.show=true; chart.sensor=row.item.sensor_id; startInterval()">
               <td >{{ row.item.event_datetime }}</td>
               <td >{{ row.item.fk_customer_idx }}</td>
               <td >{{ row.item.customer.customer_name }}</td>
@@ -62,7 +61,17 @@
         </v-data-table>
         
         <br/>
-        <v-card flat>
+        <template v-if="chart.show">
+          <v-card>
+            <v-card-title class="body-1 font-weight-bold py-2">실시간 감지기 신호</v-card-title>
+            <v-divider/>
+            <highcharts
+                constructor-type="chart"
+                :class="realtime-graph"
+                :options="chartOption_sensor_logs"/>
+          </v-card>
+        </template>
+        <!-- <v-card flat>
           <v-row>
             <div class="sensor-detail-container-2">
               <highcharts
@@ -72,7 +81,7 @@
               />
             </div>
           </v-row>
-        </v-card>
+        </v-card> -->
 
       </div>
     </template>
@@ -80,21 +89,40 @@
 </template>
 
 <script>
+import axios from "axios";
 import _ from "lodash";
 const chartOptions = {
-  // chart: { zoomType: 'xy' },
+  chart: {
+    // zoomType: 'xy',
+  },
   title: { text: null },
-  colors: ["skyblue", "orange"],
-  xAxis: [{categories: [], crosshair: false}],
-  yAxis: [
-    {
-      labels: { format: "{value:,f}" },
-      title: { text: "계측 값" },
-    },
-  ],
-  credits: { enabled: false },
-  tooltip: { shared: true, crosshair: false },
-  series: [{ data: [], type: "line", name: "value", lineWidth: 2 }],
+  // colors: ["skyblue", "orange"],
+  xAxis: {
+    type: 'datetime',
+    // tickPixelInterval: 150,
+    // maxZoom: 20 * 1000
+  },
+  // xAxis: [{categories: [], crosshair: false}],
+  yAxis: {
+    minPadding: 0.2,
+    maxPadding: 0.2,
+    title: {
+      text: 'value',
+    }
+  },
+  // yAxis: [
+  //   {
+  //     labels: { format: "{value:,f}" },
+  //     title: { text: "계측 값" },
+  //   },
+  // ],
+  // credits: { enabled: false },
+  // tooltip: { shared: true, crosshair: false },
+  // series: [{ data: [], type: "line", name: "value", lineWidth: 2 }],
+  series: [{
+    name: 'Sensor Data',
+    data: []
+  }]
 };
 
 export default {
@@ -107,6 +135,43 @@ export default {
       let {data} = await this.$http.get("sensor_event")
       this.sensor.data = data.objects;
     },
+    async getLogs() {
+      let params = {
+        'sensor_id': this.chart.sensor
+      }
+      let {data} = await this.$http.get("sensor-log-chart", {params})
+      this.chart.data = data.objects;
+      // data.map((v) => {
+      //   this.chart.data.push({
+      //     x: v.dates,
+      //     y: v.objects
+      //   })
+      // })
+      console.log(JSON.stringify(this.chart.data))
+    },
+    startInterval() {
+      clearTimeout(this.tick); //tick <-어디 있는 변수?
+      this.tick = setTimeout(async () => {
+        this.getLogs();
+      }, 800)
+    }
+    // requestData() {
+    //   alert(1)
+    //   var url = this.$session.getWebURL() + '/api/v1/sensor-log-chart'
+    //   axios({
+    //     method: 'get',
+    //     url: url,
+    //     responseType: 'blob'
+    //   })
+    //   .then(result => {
+    //     var series = chartOptions.series[0],
+    //         shift = series.data.length > 20;
+    //         chartOptions.series[0].addPoint(result, true, shift);
+    //     setTimeout(this.requestData, 1000);
+    //   })
+    //   .catch(alert(1))
+    // }
+
     // async getSensorData() {
     //   let {data} = await this.$http.post("sensor_data", {}).catch((error) =>{
     //     console.log(error)
@@ -120,8 +185,8 @@ export default {
     //     y:Math.ceil(v.data *8)/8
     //   }));
     //   this.startInterval()
-      
     // },
+
     // startInterval(){
     //   clearTimeout(this.tick);
     //   this.tick = setTimeout(async ()=> {
@@ -141,6 +206,12 @@ export default {
     },
   },
   computed:{
+    chartOption_sensor_logs() {
+      let obj = _.cloneDeep(chartOptions)
+      obj.chart.type = 'line'
+      obj.series[0].data = this.chart.data;
+      return obj
+    }
     // chartOption_flux() {
     //   let obj = _.cloneDeep(chartOptions);
     //   obj.series[0].data = this.data_objs.flux.map((v) => v.y);
@@ -169,23 +240,10 @@ export default {
         search: '',
       },
       loading: false,
-      addPopup: {
-        show: false,
-        form: {
-          repeater_idx: '',
-          fk_customer_idx: '',
-          receiver_id: '',
-          system_id: '',
-          repeater_id: '',
-        }
-      },
-      infoPopup: {
-        show: false,
-        form: {}
-      },
-      deletePopup: {
-        show: false,
-        delTarget: ''
+      chart: {
+        show: true,
+        sensor: null,
+        data: []
       }
     };
   },
@@ -215,5 +273,8 @@ td {
   margin-left:10px;
   margin-bottom: 10px;
   width:48%;
+}
+.realtime-graph{
+  width: 50%
 }
 </style>

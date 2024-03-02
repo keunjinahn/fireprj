@@ -66,20 +66,20 @@ class ExampleLogAgent(object):
     
     def example_logging(self, cursor):
         # 센서 갯수 많아져서 리미트 걸어야함/ 나중에 수정 필요
-        # sensor_list_sql = '''
-        # SELECT * FROM fire_sensor_tbl
-        # '''
-        # cursor.execute(sensor_list_sql)
-        # sensor_list = [row for row in cursor.fetchall()]
+        sensor_list_sql = '''
+        SELECT * FROM fire_sensor_tbl
+        '''
+        cursor.execute(sensor_list_sql)
+        sensor_list = [row for row in cursor.fetchall()]
         
         is_error_cnt = 0
         while is_error_cnt < 1: #샘플 데이터가 없으면 새로 만드는 반복문
             data_list = self.create_example_dataset(len(sensor_list))
             is_error_cnt += 1
             while True:
-                print('running...')
+                print(datetime.now())
                 try:
-                    for _ in range(1000):
+                    for _ in range(1):
                         for i, sensor in enumerate(sensor_list):
                             data = [1, 1, 1, sensor["receiver_id"], sensor["system_id"], sensor["repeater_id"]\
                                     , sensor["sensor_id"], round(data_list[i].pop(0), 4), 0, f'"{datetime.now()}"']
