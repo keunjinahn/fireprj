@@ -8,7 +8,9 @@ from datetime import datetime, timedelta
 import os
 import json
 from functools import wraps
-import openpyxl
+from openpyxl import Workbook
+from openpyxl.styles import PatternFill, Color, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 from backend import app, login_manager
 from backend_model.table_fireprj import *
@@ -248,3 +250,62 @@ def password_encoder_512(password):
     h = hashlib.sha512()
     h.update(password.encode('utf-8'))
     return h.hexdigest()
+
+@app.route('/api/v1/make_excel', methods=['POST'])
+def make_excel_api():
+    data = json.loads(request.data)
+    page = data['page_name']
+    db_router = {
+        'sensor_manage': FireSensorTbl(),
+        'repeater_manage': FireRepeaterTbl(),
+        'receiver_manage': FireReceiverTbl(),
+        # 'sensor_event': EventLogTbl(), #?
+        'event_list': EventTbl(),
+        # 'sensor_analysis': EventLogTbl(), #?
+        'user': UserTbl(),
+    }
+    target_db = db_router[page]
+    db_data = target_db.query.all()
+
+    target_path = './download/'
+    file_name = f'{page} {datetime.now().strftime("%Y%m%d%H%M%S")}.xlsx'
+    wb = Workbook()
+    ws = wb.active
+
+    ws.append(data['headers']) #헤더 삽입
+    for row in db_data: #내용 삽입
+        values = [getattr(row, col.name) for col in row.__table__.columns][1:]
+        if 'manage' in page:
+            values = [str(v).zfill(3) for v in values]
+            values[1] = values[1].zfill(5)
+        if page == 'event_list':
+            values = [v if i == 0 or i == len(values) else str(v).zfill(3) for i, v in enumerate(values)]
+        if page == 'user':
+            del values[-1]
+            values[1] = '****'
+            values[3] = '사용' if values[3] == 1 else '미사용'
+            values[4] = '관리' if values[3] == 1 else '조회'
+        ws.append(values)
+
+    bd_thin = Side(border_style='thin', color='000000')
+    bd_all = Border(bd_thin, bd_thin, bd_thin, bd_thin)
+    for row in ws.rows: #테두리, 정렬
+        for cell in row:
+            cell.border = bd_all
+            cell.alignment = Alignment(horizontal='left')
+    for cell in ws['1']: #헤더 스타일 지정
+        cell.fill = PatternFill(fill_type='solid', fgColor=Color('a0a0a0'))
+        cell.alignment = Alignment(horizontal='center')
+        ws.column_dimensions[get_column_letter(cell.col_idx)].width = 15 #열 크기 지정
+    if page == 'sensor_manage': ws.column_dimensions['A'].width = 23
+    if page == 'repeater_manage': ws.column_dimensions['A'].width = 17
+    if page == 'receiver_manage': ws.column_dimensions['A'].width = 14
+    if page == 'event_list': ws.column_dimensions['G'].width = 50
+
+    wb.save(target_path+file_name)
+    return make_response(jsonify({"filename":file_name}), 200)
+
+@app.route('/api/v1/save_excel/<filename>', methods=['GET'])
+def save_excel_api(filename):
+    upload_path = os.getcwd() + '/download'
+    return send_from_directory(upload_path, filename)

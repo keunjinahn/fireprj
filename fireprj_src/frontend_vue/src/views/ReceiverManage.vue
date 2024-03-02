@@ -37,7 +37,8 @@
             <v-col cols="2">
               <v-btn depressed dark big
                       color="light-blue darken-2"
-                      class="m-left">
+                      class="m-left"
+                      @click="downloadExcel()">
                 <v-icon small>mdi-arrow-down-bold-outline</v-icon>
                 <div class="ml-1">xls 다운로드</div>
               </v-btn>
@@ -196,7 +197,7 @@
 </template>
 
 <script>
-
+import axios from "axios";
 export default {
   props: {
   },
@@ -308,6 +309,37 @@ export default {
       await this.$http.delete(`receiver/${param}`)
       this.getReceiver()
       this.deletePopup.show = false;
+    },
+    async downloadExcel() {
+      let params = {
+        "page_name": "receiver_manage",
+        "headers": (() => {
+          let headers_text = []
+          for (let i=0; i < this.receiver.headers.length-1; i++) {
+            headers_text.push(this.receiver.headers[i].text)
+          }
+          return headers_text
+        })()
+      }
+      let {data} = await this.$http.post('make_excel', params)
+
+      var url = this.$session.getWebURL() + '/api/v1/save_excel/' + data.filename
+      axios({
+        method: 'get',
+        url:url,
+        responseType: 'blob'
+      })
+      .then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data], {
+          type: 'application/vnd.ms-excel'
+        }))
+        const link = document.createElement('a')
+        link.href = url
+        var download_file_name = "수신기목록_" + Date.now().toString() + ".xlsx"
+        link.setAttribute('download', download_file_name)
+        link.click()
+      })
+      .catch(() => console.log('error: excel download error'))
     }
   },
   mounted() {

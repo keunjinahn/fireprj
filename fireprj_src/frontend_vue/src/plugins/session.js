@@ -130,9 +130,9 @@ export default new Vue({
     },
     getWebURL() {
       // return (process.env.LOCAL_SERVER === 'Y') ? 'http://localhost:8080' : 'http://118.128.43.7:30443'
-      //return 'http://localhost:8080'
+      return 'http://localhost:8080'
       // return 'http://118.128.43.7:30443'
-      return 'https://kodis.or.kr:50443'
+      // return 'https://kodis.or.kr:50443'
     },
     async setToken (user) {
       this.$http.defaults.headers.common['token'] = user.token
