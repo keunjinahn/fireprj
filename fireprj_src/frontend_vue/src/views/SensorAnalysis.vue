@@ -48,14 +48,15 @@
           class="elevation-1 mt-4">
           <template v-slot:item="row">
             <tr class="clickable-row" @click="chart.show=true; chart.sensor=row.item.sensor_id; startInterval()">
+              <td >{{ row.item.id }}</td>
               <td >{{ row.item.event_datetime }}</td>
-              <td >{{ row.item.fk_customer_idx }}</td>
+              <td >{{ String(row.item.fk_customer_idx).padStart(5,'0') }}</td>
               <td >{{ row.item.customer.customer_name }}</td>
               <td >{{ row.item.receiver_type }}</td>
-              <td >{{ row.item.receiver_id}}</td>
-              <td >{{ row.item.system_id}}</td>
-              <td >{{ row.item.repeater_id }}</td>
-              <td >{{ row.item.sensor_id }}</td>
+              <td >{{ String(row.item.receiver_id).padStart(3,'0') }}</td>
+              <td >{{ String(row.item.system_id).padStart(3,'0') }}</td>
+              <td >{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
+              <td >{{ String(row.item.sensor_id).padStart(3,'0') }}</td>
             </tr>
           </template>
         </v-data-table>
@@ -132,8 +133,44 @@ export default {
   methods: {
     async getSensor() {
 
-      let {data} = await this.$http.get("sensor_event")
-      this.sensor.data = data.objects;
+      const { page, itemsPerPage, sortBy, sortDesc } = this.sensor.options;
+      try {
+        let filters_or = []
+        let filters_and = []
+        let order_by = []
+        if (this.sensor.search) {
+          filters_or.push({name: 'event_desc', op: 'like', val: `%${this.sensor.search}%`})
+        }
+        if (sortBy.length) {
+          for (let i=0; i<sortBy.length; i++) {
+            order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
+          }
+        }else{
+          order_by.push({field: "id", direction: 'asc'})
+        }
+
+        let q = {
+          filters: [{or: filters_or}, {and: filters_and}],
+          order_by
+        }
+        let params = {
+          q: q,
+          results_per_page: itemsPerPage,
+          page: page,
+        };
+
+        let { data } = await this.$http.get("sensor_event", { params });
+        this.sensor.total = data.num_results;
+        this.sensor.data = data.objects.map((v, i) => {
+          v._index = i + (page - 1) * itemsPerPage + 1;
+          return v;
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        this.sensor.loading = false;
+      } 
+
     },
     async getLogs() {
       let params = {
@@ -201,6 +238,7 @@ export default {
   watch: {
     "sensor.options": {
       handler() {
+        this.getSensor()
       },
       deep: true,
     },
@@ -225,6 +263,7 @@ export default {
     return {
       sensor: {
         headers: [
+          {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
           {text: "이벤트 시간", value: "event_datetime", sortable: false,align: 'center', width: 80}, 
           {text: "고객 식별자", value: "fk_customer_idx",align: 'center', sortable: false, width: 60},
           {text: "고객명", value: "customer.customer_name",align: 'center', sortable: false, width: 40},
@@ -238,6 +277,7 @@ export default {
         options: {"page":1,"itemsPerPage":5,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
         search: '',
+        total:0
       },
       loading: false,
       chart: {

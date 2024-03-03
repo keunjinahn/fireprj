@@ -6,9 +6,9 @@
           <v-toolbar-title>이벤트 리스트</v-toolbar-title>
         </v-toolbar>
 
-        <v-card flat>
-          <v-toolbar rounded dense class="elevation-1">
-            <v-col cols="5">
+        <v-card flat height="100">
+          <v-toolbar rounded dense class="elevation-1" height="100">
+            <v-col cols="8">
               <v-text-field outlined dense hide-details
                             placeholder="이벤트 검색"
                             append-icon="mdi-magnify"
@@ -46,7 +46,22 @@
           :items-per-page="20"
           :footer-props="{'items-per-page-options': [20,40,60,-1]}"
           class="elevation-1 mt-4">
-          <template v-slot:item="row">
+          <template v-slot:[`item.system_id_c`]="{item}">
+            {{String(item.system_id_c).padStart(3,'0')}}
+          </template>
+          <template v-slot:[`item.repeater_id_c`]="{item}">
+            {{String(item.repeater_id_c).padStart(3,'0')}}
+          </template>    
+          <template v-slot:[`item.sensor_id_c`]="{item}">
+            {{String(item.sensor_id_c).padStart(3,'0')}}
+          </template>
+          <template v-slot:[`item.sensor_value_c`]="{item}">
+            {{String(item.sensor_value_c).padStart(3,'0')}}
+          </template>
+          <template v-slot:[`item.inout_id_c`]="{item}">
+            {{String(item.inout_id_c).padStart(3,'0')}}
+          </template>
+          <!-- <template v-slot:item="row">
             <tr >
               <td >{{ row.item.event_idx }}</td>
               <td >{{ row.item.system_id_c }}</td>
@@ -56,7 +71,7 @@
               <td >{{ row.item.inout_id_c }}</td>
               <td >{{ row.item.event_desc }}</td>
             </tr>
-          </template>
+          </template> -->
         </v-data-table>
       </div>
     </template>
@@ -92,6 +107,7 @@ export default {
           filters: [{or: filters_or}, {and: filters_and}],
           order_by
         }
+
         let params = {
           q: q,
           results_per_page: itemsPerPage,
@@ -104,6 +120,7 @@ export default {
           v._index = i + (page - 1) * itemsPerPage + 1;
           return v;
         });
+        
       } catch (err) {
         console.error(err);
       } finally {
@@ -111,10 +128,7 @@ export default {
       }      
        
     },
-    popupSensorData(e, {item}) {
-      this.infoPopup.form = item;
-      this.infoPopup.show = true;
-    },
+
     async downloadExcel() {
       let params = {
         "page_name": "event_list",
@@ -149,6 +163,7 @@ export default {
   },
   mounted() {
     this.getSensor()
+
   },
   watch: {
     "sensor.options": {
@@ -162,7 +177,7 @@ export default {
     return {
       sensor: {
         headers: [
-          {text: "이벤트", value: "event_idx", sortable: false,align: 'center', width: 80},
+          {text: "이벤트", value: "event_idx", sortable: false,align: 'center', width: 40},
           {text: "계통 번호", value: "system_id_c",align: 'center', sortable: false, width: 60},
           {text: "중계기 번호", value: "repeater_id_c",align: 'center', sortable: false, width: 40},
           {text: "감지기 번호", value: "sensor_id_c",align: 'center', sortable: false, width: 20},
@@ -174,28 +189,8 @@ export default {
         options: {"page":1,"itemsPerPage":20,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
         search: '',
-        total:0
+        total:0,
       },
-      loading: false,
-      addPopup: {
-        show: false,
-        form: {
-          sensor_idx: '',
-          fk_customer_idx: '',
-          receiver_id: '',
-          system_id: '',
-          repeater_id: '',
-          sensor_id: '',
-        }
-      },
-      infoPopup: {
-        show: false,
-        form: {}
-      },
-      deletePopup: {
-        show: false,
-        delTarget: ''
-      }
     };
   },
 };

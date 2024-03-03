@@ -254,22 +254,43 @@ export default {
     },
     async getReceiver() {
 
-      let filters_or = []
-      let filters_and = []
-      let order_by = []
+      const { page, itemsPerPage, sortBy, sortDesc } = this.receiver.options;
+      try {
+        let filters_or = []
+        let filters_and = []
+        let order_by = []
+        if (this.receiver.search) {
+          filters_or.push({name: 'fk_customer_idx', op: 'like', val: `%${this.receiver.search}%`})
+        }
+        if (sortBy.length) {
+          for (let i=0; i<sortBy.length; i++) {
+            order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
+          }
+        }else{
+          order_by.push({field: "id", direction: 'asc'})
+        }
 
-      order_by.push({field: 'id', direction: 'desc'})
+        let q = {
+          filters: [{or: filters_or}, {and: filters_and}],
+          order_by
+        }
+        let params = {
+          q: q,
+          results_per_page: itemsPerPage,
+          page: page,
+        };
 
-      let q = {
-        filters: [{or: filters_or}, {and: filters_and}],
-        order_by
+        let { data } = await this.$http.get("receiver", { params });
+        this.receiver.total = data.num_results;
+        this.receiver.data = data.objects.map((v, i) => {
+          v._index = i + (page - 1) * itemsPerPage + 1;
+          return v;
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        this.receiver.loading = false;
       }
-      let params = {
-        q: q,
-      };
-
-      let {data} = await this.$http.get("receiver", {params})
-      this.receiver.data = data.objects;
     },
     async addReceiver() {
       
@@ -349,6 +370,7 @@ export default {
   watch: {
     "receiver.options": {
       handler() {
+        this.getReceiver()
       },
       deep: true,
     },
@@ -358,6 +380,7 @@ export default {
       customer_list:[],
       receiver: {
         headers: [
+          {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
           {text: '수신기 식별자', value: 'receiver_idx', sortable: false,align: 'center', width: 80},
           {text: "고객 식별자", value: "fk_customer_idx",align: 'center', sortable: false, width: 60},
           {text: "수신기 타입", value: "receiver_type",align: 'center', sortable: false, width: 40},
@@ -368,6 +391,7 @@ export default {
         options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
         search: '',
+        total:0
       },
       loading: false,
       addPopup: {

@@ -238,11 +238,45 @@ export default {
     },    
     async getUser() {
 
-      let {data} = await this.$http.get("user")
-      this.users.data = data.objects;
+      const { page, itemsPerPage, sortBy, sortDesc } = this.users.options;
+      try {
+        let filters_or = []
+        let filters_and = []
+        let order_by = []
+        if (this.users.search) {
+          filters_or.push({name: 'user_id', op: 'like', val: `%${this.users.search}%`})
+        }
+        if (sortBy.length) {
+          for (let i=0; i<sortBy.length; i++) {
+            order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
+          }
+        }else{
+          order_by.push({field: "id", direction: 'asc'})
+        }
+
+        let q = {
+          filters: [{or: filters_or}, {and: filters_and}],
+          order_by
+        }
+        let params = {
+          q: q,
+          results_per_page: itemsPerPage,
+          page: page,
+        };
+
+        let { data } = await this.$http.get("user", { params });
+        this.users.total = data.num_results;
+        this.users.data = data.objects.map((v, i) => {
+          v._index = i + (page - 1) * itemsPerPage + 1;
+          return v;
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        this.users.loading = false;
+      }   
     },
     async addUser() {
-      // 2번 호출되서 서버에 objectDeletedError 뜸
       let param = {
         user_id: this.addPopup.form.user_id,
         user_pwd: this.addPopup.form.user_pwd,
@@ -317,6 +351,7 @@ export default {
   watch: {
     "users.options": {
       handler() {
+        this.getUser()
       },
       deep: true,
     },
@@ -325,6 +360,7 @@ export default {
     return {
       users: {
         headers: [
+          {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
           {text: '사용자 식별자', value: 'user_id', sortable: false,align: 'center', width: 80},
           {text: "사용자 비밀번호", value: "user_pwd",align: 'center', sortable: false, width: 60},
           {text: "사용자 성명", value: "user_name",align: 'center', sortable: false, width: 40},
@@ -336,6 +372,7 @@ export default {
         options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
         search: '',
+        total:0
       },
       loading: false,
       addPopup: {
