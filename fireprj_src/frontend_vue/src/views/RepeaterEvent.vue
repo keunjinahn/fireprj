@@ -26,14 +26,13 @@
               </v-btn>
             </v-col>
             <v-col cols="1">
-              <!--
               <v-btn depressed dark big
                       color="light-blue darken-2"
-                      class="m-left">
+                      class="m-left"
+                      @click="downloadExcel()">
                 <v-icon small>mdi-arrow-down-bold-outline</v-icon>
                 <div class="ml-1">xls 다운로드</div>
               </v-btn>
-            -->
             </v-col>
           </v-toolbar>
         </v-card>
@@ -109,6 +108,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import { eq } from 'lodash';
 import moment from 'moment'
 export default {
@@ -186,6 +186,37 @@ export default {
       } finally {
         this.event.loading = false;
       }        
+    },
+    async downloadExcel() {
+      let params = {
+        "page_name": "repeater_event",
+        "headers": (() => {
+          let headers_text = []
+          for (let i=1; i < this.repeater.headers.length-1; i++) {
+            headers_text.push(this.repeater.headers[i].text)
+          }
+          return headers_text
+        })()
+      }
+      let {data} = await this.$http.post('make_excel', params)
+
+      var url = this.$session.getWebURL() + '/api/v1/save_excel/' + data.filename
+      axios({
+        method: 'get',
+        url:url,
+        responseType: 'blob'
+      })
+      .then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data], {
+          type: 'application/vnd.ms-excel'
+        }))
+        const link = document.createElement('a')
+        link.href = url
+        var download_file_name = "중계기상태_" + Date.now().toString() + ".xlsx"
+        link.setAttribute('download', download_file_name)
+        link.click()
+      })
+      .catch(() => console.log('error: excel download error'))
     }
     
 

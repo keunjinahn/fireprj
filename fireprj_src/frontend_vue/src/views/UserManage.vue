@@ -318,7 +318,7 @@ export default {
         "page_name": "user",
         "headers": (() => {
           let headers_text = []
-          for (let i=0; i < this.users.headers.length-1; i++) {
+          for (let i=1; i < this.users.headers.length-1; i++) {
             headers_text.push(this.users.headers[i].text)
           }
           return headers_text

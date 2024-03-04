@@ -258,17 +258,47 @@ def password_encoder_512(password):
     h.update(password.encode('utf-8'))
     return h.hexdigest()
 
+def parse_dbdata_for_excel_format(page, values):
+    if page == 'sensor_event':
+        tmp = ['정상' if v == 1 else '이상' for v in values[6:10]]
+        tmp.append(values[10].strftime("%Y-%m-%d %H:%M:%S") if values[10] is not None else None)
+        values = values[:6]
+    elif page == 'repeater_event':
+        tmp = ['정상' if v == 1 else '이상' for v in values[5:9]]
+        tmp.append(values[9].strftime("%Y-%m-%d %H:%M:%S") if values[9] is not None else None)
+        values = values[:5]
+
+    if page == 'sensor_manage' or page == 'repeater_manage':
+        values = values[:-5]
+    if 'manage' in page or '_event' in page:
+        values[1] = str(values[1]).zfill(5)
+        values[2:] = [str(v).zfill(3) for v in values[2:]]
+    if '_event' in page:
+        values += tmp
+
+    if page == 'event_list':
+        values[1:6] = [str(v).zfill(3) for v in values[1:6]]
+    if page == 'user':
+        del values[-1]
+        values[1] = '****'
+        values[3] = '사용' if values[3] == 1 else '미사용'
+        values[4] = '관리' if values[4] == 1 else '조회'
+    return values
+
 @app.route('/api/v1/make_excel', methods=['POST'])
 def make_excel_api():
     data = json.loads(request.data)
     page = data['page_name']
+    headers = data['headers']
+    if '_event' in page:
+        headers = headers[1:] + [headers[0]]
     db_router = {
         'sensor_manage': FireSensorTbl(),
         'repeater_manage': FireRepeaterTbl(),
         'receiver_manage': FireReceiverTbl(),
-        # 'sensor_event': EventLogTbl(), #?
+        'sensor_event': FireSensorTbl(),
+        'repeater_event': FireRepeaterTbl(),
         'event_list': EventTbl(),
-        # 'sensor_analysis': EventLogTbl(), #?
         'user': UserTbl(),
     }
     target_db = db_router[page]
@@ -279,19 +309,10 @@ def make_excel_api():
     wb = Workbook()
     ws = wb.active
 
-    ws.append(data['headers']) #헤더 삽입
+    ws.append(headers) #헤더 삽입
     for row in db_data: #내용 삽입
         values = [getattr(row, col.name) for col in row.__table__.columns][1:]
-        if 'manage' in page:
-            values = [str(v).zfill(3) for v in values]
-            values[1] = values[1].zfill(5)
-        if page == 'event_list':
-            values = [v if i == 0 or i == len(values) else str(v).zfill(3) for i, v in enumerate(values)]
-        if page == 'user':
-            del values[-1]
-            values[1] = '****'
-            values[3] = '사용' if values[3] == 1 else '미사용'
-            values[4] = '관리' if values[3] == 1 else '조회'
+        values = parse_dbdata_for_excel_format(page, values)
         ws.append(values)
 
     bd_thin = Side(border_style='thin', color='000000')
@@ -308,6 +329,12 @@ def make_excel_api():
     if page == 'repeater_manage': ws.column_dimensions['A'].width = 17
     if page == 'receiver_manage': ws.column_dimensions['A'].width = 14
     if page == 'event_list': ws.column_dimensions['G'].width = 50
+    if page == 'sensor_event':
+        ws.column_dimensions['A'].width = 23
+        ws.column_dimensions['K'].width = 18
+    if page == 'repeater_event':
+        ws.column_dimensions['A'].width = 17
+        ws.column_dimensions['J'].width = 18
 
     wb.save(target_path+file_name)
     return make_response(jsonify({"filename":file_name}), 200)

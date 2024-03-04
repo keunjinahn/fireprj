@@ -429,7 +429,7 @@ export default {
         "page_name": "sensor_manage",
         "headers": (() => {
           let headers_text = []
-          for (let i=0; i < this.sensor.headers.length-1; i++) {
+          for (let i=1; i < this.sensor.headers.length-1; i++) {
             headers_text.push(this.sensor.headers[i].text)
           }
           return headers_text

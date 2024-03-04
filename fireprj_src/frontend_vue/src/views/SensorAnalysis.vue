@@ -25,14 +25,6 @@
                 <div class="ml-1">조회</div>
               </v-btn>
             </v-col>
-            <v-col cols="1">
-              <v-btn depressed dark big
-                      color="light-blue darken-2"
-                      class="m-left">
-                <v-icon small>mdi-arrow-down-bold-outline</v-icon>
-                <div class="ml-1">xls 다운로드</div>
-              </v-btn>
-            </v-col>
           </v-toolbar>
         </v-card>
 
