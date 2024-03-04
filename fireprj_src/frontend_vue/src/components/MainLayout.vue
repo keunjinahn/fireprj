@@ -160,7 +160,7 @@ export default {
         icon: "mdi-radio-tower",
         text: "실시간 모니터링",
         subLinks: [
-          { text: "실시간 감지기", route: "sensor_event"},
+          { text: "화재감지기 상태", route: "sensor_event"},
           { text: "이벤트 리스트", route: "event_list"},
         ]
       },
@@ -173,7 +173,7 @@ export default {
       },
       {
         icon: "mdi-account-plus",
-        text: "CRM",
+        text: "사용자",
         subLinks: [
           { text: "사용자 관리", route: "user_manage"},
         ]

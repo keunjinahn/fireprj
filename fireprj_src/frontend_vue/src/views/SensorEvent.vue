@@ -3,7 +3,7 @@
     <template v-slot>
       <div class="main-panel">
         <v-toolbar color="light-blue darken-4" dark flat>
-          <v-toolbar-title>실시간 감지기</v-toolbar-title>
+          <v-toolbar-title>화재감지기 상태</v-toolbar-title>
         </v-toolbar>
 
         <v-card flat height="100">
@@ -47,41 +47,69 @@
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           class="elevation-1 mt-4">
           <template v-slot:item="row">
-            <tr>
+            <tr class="clickable-row" @click="onSensorItemClick(row.item)">
               <td >{{ row.item.id }}</td>
-              <td >{{ row.item.event_datetime }}</td>
+              <td >{{ row.item.last_event_time | moment('YYYY-MM-DD HH:mm:ss')}}</td>
               <td >{{ String(row.item.fk_customer_idx).padStart(5,'0') }}</td>
               <td >{{ row.item.customer.customer_name }}</td>
-              <td >{{ row.item.receiver_type }}</td>
+              <td >{{ $session.receiver_type_list.find(v=>v.code==row.item.receiver.receiver_type).name }}</td>
               <td >{{ String(row.item.receiver_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.system_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.sensor_id).padStart(3,'0') }}</td>
               <td>
-                <div v-if="row.item.regist_status" class="normal-circle"></div>
+                <div v-if="row.item.register_status" class="normal-blue-circle"></div>
                 <div v-else class="anomal-circle"></div>
               </td>
               <td >
-                <div v-if="row.item.action_status" class="normal-circle"></div>
+                <div v-if="row.item.action_status" class="normal-red-circle"></div>
                 <div v-else class="anomal-circle"></div>
               </td>
               <td>
-                <div v-if="row.item.network_status" class="normal-circle"></div>
+                <div v-if="row.item.com_status" class="normal-red-circle"></div>
                 <div v-else class="anomal-circle"></div>
               </td>
               <td >
-                <div v-if="row.item.battery_status" class="normal-circle"></div>
+                <div v-if="row.item.battery_status" class="normal-red-circle"></div>
                 <div v-else class="anomal-circle"></div>
               </td>              
             </tr>
           </template>
         </v-data-table>
+        <v-toolbar color="light-blue darken-1" dark flat>
+          <v-toolbar-title>감지기 이벤트 상세</v-toolbar-title>
+        </v-toolbar>         
+        <v-data-table
+        :headers="event.headers"
+        :items="event.data"
+        :loading="event.loading"
+        :options.sync="event.options"
+        :server-items-length="event.total"
+        :items-per-page="5"
+        :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
+        class="elevation-1 mt-4">
+        <template v-slot:item="row">
+          <tr>
+            <td >{{ row.item._index }}</td>
+            <td >{{ row.item.event_datetime | moment('YYYY-MM-DD HH:mm:ss')}}</td>
+            <td >{{ row.item.event_id }}</td>
+            <td >{{ row.item.sensor_value }}</td>
+            <td >{{ row.item.event.event_desc }}</td>
+            <td >{{ row.item.inout_id }}</td>
+          </tr>
+        </template>
+      </v-data-table>        
       </div>
+
+
+
     </template>
   </main-layout> 
 </template>
 
 <script>
+import { eq } from 'lodash';
+import moment from 'moment'
 export default {
   props: {
   },
@@ -96,7 +124,7 @@ export default {
         let filters_and = []
         let order_by = []
         if (this.sensor.search) {
-          filters_or.push({name: 'fk_customer_idx', op: 'like', val: `%${this.sensor.search}%`})
+          filters_or.push({name: 'customer', op: 'has', val: {name: "customer_name", op: "like", val: `%${this.sensor.search}%`}});
         }
         if (sortBy.length) {
           for (let i=0; i<sortBy.length; i++) {
@@ -129,6 +157,37 @@ export default {
         this.sensor.loading = false;
       }   
     },
+    async onSensorItemClick(item){
+      const { page, itemsPerPage, sortBy, sortDesc } = this.event.options;
+      try {
+        let filters_or = []
+        let filters_and = []
+        let order_by = []
+        filters_and.push({name: 'sensor_id', op: 'eq', val: item.sensor_id})
+        order_by.push({field: "event_log_idx", direction: 'desc'})
+        let q = {
+          filters: [{or: filters_or}, {and: filters_and}],
+          order_by
+        }
+        let params = {
+          q: q,
+          results_per_page: itemsPerPage,
+          page: page,
+
+        };
+        let { data } = await this.$http.get("event_log_list", { params });
+        this.event.total = data.num_results;
+        this.event.data = data.objects.map((v, i) => {
+          v._index = i + (page - 1) * itemsPerPage + 1;
+          return v;
+        });
+        this.selected_sensor = item
+      } catch (err) {
+        console.error(err);
+      } finally {
+        this.event.loading = false;
+      }        
+    }
     
 
   },
@@ -142,6 +201,12 @@ export default {
       },
       deep: true,
     },
+    "event.options": {
+      handler() {
+        this.onSensorItemClick(this.selected_sensor)
+      },
+      deep: true,
+    },    
   },
   data() {
     return {
@@ -151,23 +216,39 @@ export default {
           {text: "이벤트 시간", value: "event_datetime", sortable: false,align: 'center', width: 80}, 
           {text: "고객 식별자", value: "fk_customer_idx",align: 'center', sortable: false, width: 60},
           {text: "고객명", value: "customer.customer_name",align: 'center', sortable: false, width: 40},
-          {text: "수신기 타입", value: "receiver_type",align: 'center', sortable: false, width: 20},
+          {text: "수신기 타입", value: "receiver_type",align: 'center', sortable: false, width: 80},
           {text: "수신기 번호", value: "receiver_id",align: 'center', sortable: false, width: 20},
           {text: "계통 번호", value: "system_id",align: 'center', sortable: false, width: 20},
           {text: "중계기 번호", value: "repeater_id",align: 'center', sortable: false, width: 20},
           {text: "감지기 번호", value: "sensor_id",align: 'center', sortable: false, width: 20},
-          {text: "등록 상태", value: "regist_status",align: 'center', sortable: false, width: 20},
+          {text: "등록 상태", value: "register_status",align: 'center', sortable: false, width: 20},
           {text: "동작 상태", value: "action_status",align: 'center', sortable: false, width: 20},
-          {text: "통신 상태", value: "network_status",align: 'center', sortable: false, width: 20},
+          {text: "통신 상태", value: "com_status",align: 'center', sortable: false, width: 20},
           {text: "배터리 상태", value: "battery_status",align: 'center', sortable: false, width: 20},
         ],
         data: [],
-        options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
+        options: {"page":1,"itemsPerPage":5,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
         search: '',
         total:0
       },
+      event: {
+        headers: [
+          {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
+          {text: "이벤트 시간", value: "event_datetime", sortable: false,align: 'center', width: 80}, 
+          {text: "이벤트  ID", value: "event_id", sortable: false,align: 'center', width: 80}, 
+          {text: "센서 값", value: "sensor_value",align: 'center', sortable: false, width: 60},
+          {text: "이벤트 내용", value: "event_desc",align: 'center', sortable: false, width: 150},
+          {text: "입출력단 번호", value: "inout_id",align: 'center', sortable: false, width: 40},          
+        ],
+        data: [],
+        options: {"page":1,"itemsPerPage":5,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
+        loading: false,
+        search: '',
+        total:0
+      },      
       loading: false,
+      selected_sensor:null
     };
   },
 };
@@ -198,7 +279,18 @@ td {
   width:48%;
 }
 
-.normal-circle
+.normal-blue-circle
+{
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid;
+  background-color: #0026ff;
+  opacity: 0.3;
+  margin: auto;
+  border: 2px solid rgb(0, 0, 0);
+}
+.normal-red-circle
 {
   width: 20px;
   height: 20px;

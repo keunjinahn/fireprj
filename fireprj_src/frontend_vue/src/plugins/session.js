@@ -172,21 +172,9 @@ export default new Vue({
       settings: setting,
       user: null,
       sessionStart: null,
-      pb: [
-        { code: '311', text: '외부 I/F 연결 장애(인디게이터)', short: '인디게이터 장애' },
-        { code: '312', text: '외부 I/F 연결 장애(CCTV 카메라)', short: 'CCTV 카메라 장애' },
-        { code: '313', text: '외부 I/F 연결 장애(QRCode 리더기)', short: 'QRCode 리더기 장애' },
-        { code: '314', text: '계근 데이터 이상(음수나 임계치 범위 벗어날 경우)', short: '계근값이상' },
-        { code: '315', text: 'Disk 사용률이 임계치 이상', short: '디스크에러' },
-        { code: '316', text: '임계치 이상의 시간동안 정보 수집이 안되는 경우', short: '수집이상' },
-        { code: '317', text: '끊어짐(데이터가 임계치 이상의 분동안 수신이 안되는 경우나 에이전트 세션이 끊긴 경우)', short: '끊어짐' },
-        { code: '001', text: '외부 I/F 연결 장애(인디게이터)', short: '인디게이터 장애' },
-        { code: '002', text: '외부 I/F 연결 장애(CCTV 카메라)', short: 'CCTV 카메라 장애' },
-        { code: '003', text: '외부 I/F 연결 장애(QRCode 리더기)', short: 'QRCode 리더기 장애' },
-        { code: '004', text: '계근 데이터 이상(음수나 임계치 범위 벗어날 경우)', short: '계근값이상' },
-        { code: '005', text: 'Disk 사용률이 임계치 이상', short: '디스크에러' },
-        { code: '006', text: '임계치 이상의 시간동안 정보 수집이 안되는 경우', short: '수집이상' },
-        { code: '007', text: '끊어짐(데이터가 임계치 이상의 분동안 수신이 안되는 경우나 에이전트 세션이 끊긴 경우)', short: '끊어짐' }
+      receiver_type_list:[
+        {name:'R형 무선식',code:1},
+        {name:'GR형 복합식',code:2}
       ]
     }
   }

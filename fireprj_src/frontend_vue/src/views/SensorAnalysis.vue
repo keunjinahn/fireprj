@@ -47,12 +47,12 @@
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           class="elevation-1 mt-4">
           <template v-slot:item="row">
-            <tr class="clickable-row" @click="chart.show=true; chart.sensor=row.item.sensor_id; startInterval()">
+            <tr class="clickable-row" @click="onShowGraph(row.item)">
               <td >{{ row.item.id }}</td>
-              <td >{{ row.item.event_datetime }}</td>
+              <td >{{ row.item.last_event_time | moment('YYYY-MM-DD HH:mm:ss')}}</td>
               <td >{{ String(row.item.fk_customer_idx).padStart(5,'0') }}</td>
               <td >{{ row.item.customer.customer_name }}</td>
-              <td >{{ row.item.receiver_type }}</td>
+              <td >{{ $session.receiver_type_list.find(v=>v.code==row.item.receiver.receiver_type).name }}</td>
               <td >{{ String(row.item.receiver_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.system_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
@@ -63,14 +63,71 @@
         
         <br/>
         <template v-if="chart.show">
-          <v-card>
-            <v-card-title class="body-1 font-weight-bold py-2">실시간 감지기 신호</v-card-title>
+          <v-toolbar color="light-blue darken-1" dark flat>
+            <v-toolbar-title>화재 감지기 신호</v-toolbar-title>
+          </v-toolbar>        
+          <v-toolbar rounded dense class="elevation-1" height="50">
+            <v-row>
+              <v-col cols="2">
+                <v-radio-group
+                inline
+                class="vrg-cls"
+                v-model="chart.range_value"
+                >
+                  <v-row >
+                    <v-col cols="4" class="vrg-item">
+                      <v-radio
+                      label="일"
+                      ></v-radio>
+                    </v-col>
+                    <v-col cols="4" class="vrg-item">
+                      <v-radio
+                      label="시"
+                      ></v-radio>
+                    </v-col>
+                    <v-col cols="4" class="vrg-item">
+                        <v-radio
+                        label="분"
+                        ></v-radio>                     
+                    </v-col>                  
+                  </v-row>
+                </v-radio-group>
+              </v-col>
+              <v-col cols="8">
+              </v-col>
+              <v-col cols="2">
+                <v-radio-group
+                inline
+                class="vrg-cls"
+                v-model="chart.check_type"
+                >
+                  <v-row >
+                    <v-col cols="6" class="vrg-item">
+                      <v-radio
+                      label="정상동작"
+                      ></v-radio>
+                    </v-col>
+                    <v-col cols="6" class="vrg-item">
+                      <v-radio
+                      label="이상동작"
+                      ></v-radio>
+                    </v-col>              
+                  </v-row>
+                </v-radio-group>
+              </v-col>              
+            </v-row>
+            
+          </v-toolbar>
+          <v-card height="300">
+            <v-card-title class="body-1 font-weight-bold py-2">감지기 번호 : {{(chart.sensor != undefined)? String(chart.sensor).padStart(3,'0') : ''}}</v-card-title>
             <v-divider/>
             <highcharts
                 constructor-type="chart"
-                :class="realtime-graph"
-                :options="chartOption_sensor_logs"/>
+                class="realtime-graph"
+                :options="chartOption_sensor_logs"
+                />
           </v-card>
+
         </template>
         <!-- <v-card flat>
           <v-row>
@@ -91,39 +148,21 @@
 
 <script>
 import axios from "axios";
+import moment from "moment";
 import _ from "lodash";
 const chartOptions = {
-  chart: {
-    // zoomType: 'xy',
-  },
   title: { text: null },
-  // colors: ["skyblue", "orange"],
-  xAxis: {
-    type: 'datetime',
-    // tickPixelInterval: 150,
-    // maxZoom: 20 * 1000
-  },
-  // xAxis: [{categories: [], crosshair: false}],
-  yAxis: {
-    minPadding: 0.2,
-    maxPadding: 0.2,
-    title: {
-      text: 'value',
-    }
-  },
-  // yAxis: [
-  //   {
-  //     labels: { format: "{value:,f}" },
-  //     title: { text: "계측 값" },
-  //   },
-  // ],
-  // credits: { enabled: false },
-  // tooltip: { shared: true, crosshair: false },
-  // series: [{ data: [], type: "line", name: "value", lineWidth: 2 }],
-  series: [{
-    name: 'Sensor Data',
-    data: []
-  }]
+  colors: ["skyblue", "orange"],
+  xAxis: [{categories: [], crosshair: false}],
+  yAxis: [
+    {
+      labels: { format: "{value:,f}" },
+      title: { text: "계측 값" },
+    },
+  ],
+  credits: { enabled: false },
+  tooltip: { shared: true, crosshair: false },
+  series: [{ data: [], type: "line", name: "value", lineWidth: 2 }],
 };
 
 export default {
@@ -139,8 +178,8 @@ export default {
         let filters_and = []
         let order_by = []
         if (this.sensor.search) {
-          filters_or.push({name: 'event_desc', op: 'like', val: `%${this.sensor.search}%`})
-        }
+          filters_or.push({name: 'customer', op: 'has', val: {name: "customer_name", op: "like", val: `%${this.sensor.search}%`}});
+        }          
         if (sortBy.length) {
           for (let i=0; i<sortBy.length; i++) {
             order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
@@ -189,51 +228,37 @@ export default {
     startInterval() {
       clearTimeout(this.tick); //tick <-어디 있는 변수?
       this.tick = setTimeout(async () => {
-        this.getLogs();
-      }, 800)
+        this.getSensorLogTempData();
+      }, 1000)
+    },
+    async getSensorLogTempData(){
+      let params = {
+        range_value: this.chart.range_value + 1,
+        sensor_id: this.chart.sensor,
+      };
+      let { data } = await this.$http.post("sensor_data_range", params)
+      this.data_objs.cate = [];
+      this.data_objs.data_list = [];
+      this.data_objs.cate = data.sensor_rt_data_list.map(v => v.event_datetime.slice(-8))
+      data.sensor_rt_data_list.map((v) => this.data_objs.data_list.push({
+        x:moment(v.event_datetime).valueOf(),
+        y:Math.ceil(v.data * 8) / 8
+      }));    
+      if (this.$route.path == "/sensor_analysis") this.startInterval();
+      this.refresh_cnt += 1;
+      this.show_anomal_layer = (this.check_type == 1)? true:false
+    },
+    onShowGraph(item){
+      this.chart.show=true;
+      this.chart.sensor=item.sensor_id;
+      this.data_objs.cate = [];
+      this.data_objs.data_list = [];      
+      this.startInterval()
     }
-    // requestData() {
-    //   alert(1)
-    //   var url = this.$session.getWebURL() + '/api/v1/sensor-log-chart'
-    //   axios({
-    //     method: 'get',
-    //     url: url,
-    //     responseType: 'blob'
-    //   })
-    //   .then(result => {
-    //     var series = chartOptions.series[0],
-    //         shift = series.data.length > 20;
-    //         chartOptions.series[0].addPoint(result, true, shift);
-    //     setTimeout(this.requestData, 1000);
-    //   })
-    //   .catch(alert(1))
-    // }
-
-    // async getSensorData() {
-    //   let {data} = await this.$http.post("sensor_data", {}).catch((error) =>{
-    //     console.log(error)
-    //   });
-
-    //   this.data_objs.cate_flux = [];
-    //   this.data_objs.flux = [];
-    //   this.data_objs.cate_flux = data.sensor_flux_list.map(v=> v.created_date)
-    //   data.sensor_flux_list.map((v)=> this.data_objs.flux.push({
-    //     x:moment(v.created_date).valueOf(),
-    //     y:Math.ceil(v.data *8)/8
-    //   }));
-    //   this.startInterval()
-    // },
-
-    // startInterval(){
-    //   clearTimeout(this.tick);
-    //   this.tick = setTimeout(async ()=> {
-    //     this.getSensorData();
-    //   },2000);
-    // },
 
   },
   mounted() {
-    this.getSensor()
+    this.getSensorLogTempData()
   },
   watch: {
     "sensor.options": {
@@ -245,9 +270,12 @@ export default {
   },
   computed:{
     chartOption_sensor_logs() {
-      let obj = _.cloneDeep(chartOptions)
-      obj.chart.type = 'line'
-      obj.series[0].data = this.chart.data;
+      let obj = _.cloneDeep(chartOptions);
+      obj.series[0].data = this.data_objs.data_list.map((v) => v.y);
+      obj.xAxis[0].categories = this.data_objs.cate
+      obj.yAxis[0].title.text = "데이터 값";
+      obj.yAxis[0].max = 10
+      obj.series[0].name = "감지기 데이터"
       return obj
     }
     // chartOption_flux() {
@@ -283,8 +311,17 @@ export default {
       chart: {
         show: true,
         sensor: null,
-        data: []
-      }
+        data: [],
+        range_value:0,
+        check_type:0,
+        show_anomal_layer:true
+      },
+      data_objs: {
+        data_list: [],
+        cate: [],                           
+      },      
+      refresh_cnt:0,
+      tick:null
     };
   },
 };
@@ -315,6 +352,15 @@ td {
   width:48%;
 }
 .realtime-graph{
-  width: 50%
+  width: 100%;
+  height:200px;
+}
+.vrg-cls{
+  margin: auto;
+
+}
+.vrg-item{
+  margin-top:20px;
+  
 }
 </style>

@@ -16,6 +16,7 @@ from backend import app, login_manager
 from backend_model.table_fireprj import *
 from backend import manager
 db = DBManager.db
+import random
 
 manager.create_api(FireSensorTbl
                    , results_per_page=10000
@@ -38,19 +39,19 @@ manager.create_api(FireReceiverTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)
 
-def get_realtime_sensor(result=None, **kw):
-    res = result['objects']
-    all_logs = EventLogTbl.query.all()
-    for sensor in res:
-        sensor['regist_status'] = True #등록상태: 센서의 데이터가 존재하면 무조건 True
-        last_sensor_log = list(filter(lambda x: x.sensor_id == sensor['sensor_id'], all_logs))
-        if len(last_sensor_log) > 0: last_sensor_log = last_sensor_log[-1]
-        else: sensor['action_status'] = sensor['network_status'] = sensor['battery_status'] = False; continue
-        offset_time = datetime.now() - timedelta(minutes=1)
-        sensor['receiver_type'] = last_sensor_log.receiver_type
-        sensor['event_datetime'] = last_sensor_log.event_datetime
-        sensor['action_status'] = sensor['network_status'] = sensor['battery_status'] \
-        = True if last_sensor_log.event_datetime >= offset_time else False #1분 이내의 데이터가 있으면 True
+# def get_realtime_sensor(result=None, **kw):
+#     res = result['objects']
+#     all_logs = EventLogTbl.query.all()
+#     for sensor in res:
+#         sensor['regist_status'] = True #등록상태: 센서의 데이터가 존재하면 무조건 True
+#         last_sensor_log = list(filter(lambda x: x.sensor_id == sensor['sensor_id'], all_logs))
+#         if len(last_sensor_log) > 0: last_sensor_log = last_sensor_log[-1]
+#         else: sensor['action_status'] = sensor['network_status'] = sensor['battery_status'] = False; continue
+#         offset_time = datetime.now() - timedelta(minutes=1)
+#         sensor['receiver_type'] = last_sensor_log.receiver_type
+#         sensor['event_datetime'] = last_sensor_log.event_datetime
+#         sensor['action_status'] = sensor['network_status'] = sensor['battery_status'] \
+#         = True if last_sensor_log.event_datetime >= offset_time else False #1분 이내의 데이터가 있으면 True
 
 manager.create_api(FireSensorTbl
                    , results_per_page=10000
@@ -59,7 +60,7 @@ manager.create_api(FireSensorTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True
                    , postprocessors={
-                       'GET_MANY': [get_realtime_sensor]
+                    #    'GET_MANY': [get_realtime_sensor]
                    })
 
 manager.create_api(EventTbl
@@ -98,6 +99,12 @@ manager.create_api(CustomerTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)
 
+manager.create_api(EventLogTbl
+                   , results_per_page=10000
+                   , url_prefix='/api/v1'
+                   , collection_name='event_log_list'
+                   , methods=['GET', 'DELETE', 'PATCH', 'POST']
+                   , allow_patch_many=True)
 
 @app.route('/make-data/event-list', methods=['GET'])
 def write_event_list_api():
@@ -329,3 +336,69 @@ def sensor_log_chart_api():
         "dates": dates
     }
     return make_response(jsonify(obj), 200)
+
+@app.route('/api/v1/insert_test_sensor_data', methods=['POST'])
+def insert_test_sensor_data_api():
+    sensor_list = FireSensorTbl.query.all()
+    receiver_list = FireReceiverTbl.query.all()
+    event_count = EventTbl.query.count()
+    str_start_date = "2024-01-01 00:00:00"
+    start_date =  datetime.strptime(str_start_date,'%Y-%m-%d %H:%M:%S')
+    for idx in range(24 * 3600): #24 * 3600
+        c_date = start_date + timedelta(seconds=idx)
+        for sensor in sensor_list :
+            new_data = EventLogTbl()
+            new_data.fk_customer_idx = sensor.fk_customer_idx
+            new_data.event_id = random.randint(1,event_count)
+            receiver = list(filter(lambda x:x.receiver_id == sensor.receiver_id,receiver_list))[0]
+            new_data.receiver_type = receiver.receiver_type if receiver is not None else 0
+            new_data.receiver_id = sensor.receiver_id
+            new_data.system_id = sensor.system_id
+            new_data.repeater_id = sensor.repeater_id
+            new_data.sensor_id = sensor.sensor_id
+            new_data.sensor_value = round(random.uniform(0, 10),4)
+            new_data.inout_id = random.randint(1,2)
+            new_data.event_datetime = c_date
+            db.session.add(new_data)
+        db.session.commit()
+        print("idx :",idx, "date : ",c_date)
+        
+    return make_response(jsonify({}), 200)
+
+@app.route('/api/v1/sensor_data_range', methods=['POST'])
+def sensor_data_range_api():
+    print("sensor_data_range start...")
+    input = json.loads(request.data)
+    range_value = int(input['range_value'])
+    sensor_id = input['sensor_id']
+    str_start_date = "2024-01-01 " + datetime.now().strftime('%H:%M:%S')
+    start_date =  datetime.strptime(str_start_date,'%Y-%m-%d %H:%M:%S')
+    def get_start_date(start_date,range_value):
+        s_date = start_date - timedelta(hours=1)            
+        if range_value == 3 :
+            s_date = start_date - timedelta(minutes=1)
+        elif range_value == 2 :
+            s_date = start_date - timedelta(minutes=10)
+        elif range_value == 1 :
+            s_date = start_date - timedelta(hours=1)            
+        return s_date
+    print("input: ",input)
+    start_date = get_start_date(start_date,range_value)
+    str_end_date = "2024-01-01 " + datetime.now().strftime('%H:%M:%S')
+    str_start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+    
+    print("start : ",str_start_date, ", end : ",str_end_date)
+    sensor_rt_data_list = EventLogTbl.query \
+        .filter(EventLogTbl.sensor_id == sensor_id) \
+        .filter(EventLogTbl.event_datetime >= str_start_date) \
+        .filter(EventLogTbl.event_datetime <= str_end_date) \
+        .all()
+    print("sensor_rt_data_list len :", len(sensor_rt_data_list))
+    sensor_value_list = []    
+    for sensor_rt_data in sensor_rt_data_list:
+        event_date = datetime.now().strftime('%Y-%m-%d') + " " +  sensor_rt_data.event_datetime.strftime('%H:%M:%S')
+        sensor_value_list.append({"data":sensor_rt_data.sensor_value,"event_datetime":event_date})
+    result_obj = {
+        "sensor_rt_data_list":sensor_value_list,
+    }
+    return make_response(jsonify(result_obj), 200)    

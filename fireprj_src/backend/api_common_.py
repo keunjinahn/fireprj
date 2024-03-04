@@ -650,7 +650,7 @@ def update_typhoon_paths_from_csv_api():
                 print("index :",index,",line : ",line)
                 line_array = line.replace('\ufeff','').split(',')
                 new_path = Paths()
-                new_path.created_date = datetime.strptime(line_array[0],"%Y-%m-%d %H:%M")
+                new_path.created_date = datetime.strptime(line_array[0],"%Y-%m-%d:%M")
                 new_path.modify_date = datetime.strptime(line_array[0],"%Y-%m-%d %H:%M")
                 
                 new_path.latitude = float(line_array[1])

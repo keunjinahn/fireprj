@@ -213,8 +213,8 @@ export default {
     openModifyPopup(item){
       this.addPopup.popup_type = 'MODIFY'
       this.addPopup.show = true
-      const customer = this.customer_list.find(v=>v.customer_idx==item.fk_customer_idx)
-      this.updateCustomer(customer)
+      this.addPopup.selected_custommer  = this.customer_list.find(v=>v.customer_idx==item.fk_customer_idx)
+      this.updateCustomer(this.addPopup.selected_custommer)
       this.addPopup.form.receiver_id = String(item.receiver_id).padStart(3,'0')
       this.addPopup.form.receiver_type = String(item.receiver_type).padStart(3,'0')
       this.addPopup.form.receiver_idx = item.receiver_idx
@@ -241,7 +241,7 @@ export default {
         customer_idx:v.customer_idx
       }));
       this.addPopup.selected_custommer = this.customer_list[0]
-      this.updateCustomer( this.customer_list[0])
+      this.updateCustomer(this.addPopup.selected_custommer)
     },
     updateCustomer(item){
       this.addPopup.form.customer_idx = String(item.customer_idx).padStart(5,'0')
@@ -260,8 +260,8 @@ export default {
         let filters_and = []
         let order_by = []
         if (this.receiver.search) {
-          filters_or.push({name: 'fk_customer_idx', op: 'like', val: `%${this.receiver.search}%`})
-        }
+          filters_or.push({name: 'customer', op: 'has', val: {name: "customer_name", op: "like", val: `%${this.receiver.search}%`}});
+        }        
         if (sortBy.length) {
           for (let i=0; i<sortBy.length; i++) {
             order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
