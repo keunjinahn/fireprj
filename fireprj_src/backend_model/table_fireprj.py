@@ -56,7 +56,7 @@ class FireRepeaterTbl(db.Model):
     id = db.Column('id', db.Integer, primary_key=True)
     repeater_idx = db.Column('repeater_idx', db.String(11))
     fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
-    receiver_id = db.Column('receiver_id', db.Integer)
+    receiver_id = db.Column('receiver_id', db.Integer,db.ForeignKey(FireReceiverTbl.receiver_id))
     system_id = db.Column('system_id', db.Integer, default='00')
     repeater_id = db.Column('repeater_id', db.Integer)
     customer = db.relationship('CustomerTbl')
@@ -65,6 +65,7 @@ class FireRepeaterTbl(db.Model):
     com_status = db.Column('com_status', db.Integer)
     battery_status = db.Column('battery_status', db.Integer)    
     last_event_time = db.Column('last_event_time', db.DateTime)
+    receiver = db.relationship('FireReceiverTbl')
 
 class FireSensorTbl(db.Model):
     __tablename__ = 'fire_sensor_tbl'

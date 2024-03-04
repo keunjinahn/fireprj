@@ -81,6 +81,11 @@
                 <v-list-item-title class="pl-14">{{ navLinks[2].subLinks[1].text }}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item dense :to="{name: navLinks[2].subLinks[2].route}" color="primary lighten-2">
+              <v-list-item-content>
+                <v-list-item-title class="pl-14">{{ navLinks[2].subLinks[2].text }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>            
           </v-list>
         </div>
 
@@ -161,6 +166,7 @@ export default {
         text: "실시간 모니터링",
         subLinks: [
           { text: "화재감지기 상태", route: "sensor_event"},
+          { text: "화재중계기 상태", route: "repeater_event"},
           { text: "이벤트 리스트", route: "event_list"},
         ]
       },

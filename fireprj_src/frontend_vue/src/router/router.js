@@ -95,10 +95,18 @@ const routes = [{
       path: 'sensor_event',
       name: 'sensor_event',
       component: View.SensorEvent,
-      meta: { breadcrumb: [{ text: '모니터링', disabled: true }, { text: '실시간 이벤트', disabled: true }] },
+      meta: { breadcrumb: [{ text: '화재감지기 상태', disabled: true }, { text: '화재감지기 상태', disabled: true }] },
       props: true,
       beforeEnter
     },
+    {
+      path: 'repeater_event',
+      name: 'repeater_event',
+      component: View.RepeaterEvent,
+      meta: { breadcrumb: [{ text: '화재중계기 상태', disabled: true }, { text: '화재중계기 상태', disabled: true }] },
+      props: true,
+      beforeEnter
+    },    
     {
       path: 'event_list',
       name: 'event_list',
