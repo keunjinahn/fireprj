@@ -59,20 +59,20 @@
               <td >{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.sensor_id).padStart(3,'0') }}</td>
               <td>
-                <div v-if="row.item.register_status" class="normal-blue-circle"></div>
-                <div v-else class="anomal-circle"></div>
+                <div v-if="row.item.register_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
               </td>
               <td >
-                <div v-if="row.item.action_status" class="normal-red-circle"></div>
-                <div v-else class="anomal-circle"></div>
+                <div v-if="row.item.action_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
               </td>
               <td>
-                <div v-if="row.item.com_status" class="normal-red-circle"></div>
-                <div v-else class="anomal-circle"></div>
+                <div v-if="row.item.com_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
               </td>
               <td >
-                <div v-if="row.item.battery_status" class="normal-red-circle"></div>
-                <div v-else class="anomal-circle"></div>
+                <div v-if="row.item.battery_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
               </td>              
             </tr>
           </template>
@@ -310,38 +310,5 @@ td {
   margin-left:10px;
   margin-bottom: 10px;
   width:48%;
-}
-
-.normal-blue-circle
-{
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid;
-  background-color: #0026ff;
-  opacity: 0.3;
-  margin: auto;
-  border: 2px solid rgb(0, 0, 0);
-}
-.normal-red-circle
-{
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid;
-  background-color: #ff0000;
-  opacity: 0.3;
-  margin: auto;
-  border: 2px solid rgb(0, 0, 0);
-}
-.anomal-circle
-{
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid;
-  background-color: #c8c8c8;
-  opacity: 0.3;
-  margin: auto;
 }
 </style>

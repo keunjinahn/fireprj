@@ -187,19 +187,20 @@ export default {
         ]
       },
       {
+        icon: "mdi-account-switch",
+        text: "CRM",
+        subLinks: [
+          { text: "CRM 관리", route: "crm_manage"},
+        ]
+      },      
+      {
         icon: "mdi-account-plus",
         text: "사용자",
         subLinks: [
           { text: "사용자 관리", route: "user_manage"},
         ]
       },
-      {
-        icon: "mdi-account-plus",
-        text: "CRM",
-        subLinks: [
-          { text: "CRM 관리", route: "crm_manage"},
-        ]
-      },
+
     ],
     logout_dialog: {
       show: false,

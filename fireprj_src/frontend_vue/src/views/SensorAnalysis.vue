@@ -87,6 +87,7 @@
               </v-col>
               <v-col cols="8">
               </v-col>
+              <!--
               <v-col cols="2">
                 <v-radio-group
                 inline
@@ -106,7 +107,7 @@
                     </v-col>              
                   </v-row>
                 </v-radio-group>
-              </v-col>              
+              </v-col>-->              
             </v-row>
             
           </v-toolbar>
@@ -224,6 +225,10 @@ export default {
       }, 1000)
     },
     async getSensorLogTempData(){
+      if(this.chart.sensor == undefined || this.chart.sensor == null){
+        clearTimeout(this.tick)
+        return
+      }
       let params = {
         range_value: this.chart.range_value + 1,
         sensor_id: this.chart.sensor,

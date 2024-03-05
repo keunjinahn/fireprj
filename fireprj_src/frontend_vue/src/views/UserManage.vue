@@ -54,6 +54,7 @@
           :search="users.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
+          @click:row="openViewPopup"
           class="elevation-1 mt-4 clickable-row">
           <template v-slot:[`item.user_pwd`]="{item}">
             *****
@@ -68,7 +69,7 @@
             <v-btn depressed small color="#aaaaaa"
                     dark class="ml-1"
                     @click.stop
-                    @click="openModifyPopup(item)">
+                    @click="openModifyPopup(item,'MODIFY')">
               수정
             </v-btn>            
             <v-btn depressed small color="deep-orange accent-4"
@@ -83,7 +84,7 @@
         <v-dialog v-model="addPopup.show" persistent max-width="500px">
           <v-card :loading="loading" :disabled="loading">
             <v-card-title class="pt-2 pb-1 primary white--text">
-              <span class="body-1">{{(addPopup.popup_type == 'ADD')? '사용자 등록':'사용자 수정'}}</span>
+              <span class="body-1">{{getPopupTitle(addPopup.popup_type)}}</span>
             </v-card-title>
             <v-divider />
             <v-card-text>
@@ -98,19 +99,19 @@
                         <tr>
                             <th class="s-h" colspan="2" rowspan="1">사용자 식별자</th>
                             <td colspan="2">
-                               <input type="text" placeholder="영문 아이디" class="abl-input" v-model="addPopup.form.user_id"/>
+                               <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="영문 아이디" class="abl-input" v-model="addPopup.form.user_id"/>
                             </td>
                         </tr>          
                         <tr>
                           <th class="s-h" colspan="2" rowspan="1">사용자 비밀번호</th>
                           <td colspan="2">
-                            <input type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd"/>
+                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd"/>
                           </td>
                         </tr>   
                         <tr>
                           <th class="s-h" colspan="2" rowspan="1">사용자 성명</th>
                           <td colspan="2">
-                            <input type="text" placeholder="사용자 성명" class="abl-input" v-model="addPopup.form.user_name"/>
+                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="사용자 성명" class="abl-input" v-model="addPopup.form.user_name"/>
                           </td>
                         </tr>   
                         <tr>
@@ -122,6 +123,7 @@
                                   item-text="name"
                                   item-value="code"
                                   @change="onChangeUserStatus"
+                                  :disabled="addPopup.popup_type == 'VIEW'"
                                 >
                               </v-select>
                           </td>
@@ -135,6 +137,7 @@
                                   item-text="name"
                                   item-value="code"
                                   @change="onChangeUserRole"
+                                  :disabled="addPopup.popup_type == 'VIEW'"
                                 >
                               </v-select>
                           </td>
@@ -161,8 +164,9 @@
                   dark
                   depressed
                   @click="addUser"
+                  v-if="addPopup.popup_type != 'VIEW'"
               >
-              {{(addPopup.popup_type == 'ADD')? '사용자 등록':'사용자 수정'}}
+              {{getPopupTitle(addPopup.popup_type)}}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -219,16 +223,24 @@ export default {
       this.addPopup.popup_type = 'ADD'
       this.addPopup.show = true
     },
-    openModifyPopup(item) {
+    openModifyPopup(item,type) {
       this.addPopup.selected_status = this.user_status_list.find(v => v.code == item.user_status)
       this.addPopup.selected_role = this.user_role_list.find(v => v.code == item.user_role)
       this.addPopup.form.user_id = item.user_id
       this.addPopup.form.user_pwd = '*****'
       this.addPopup.form.user_name = item.user_name
       this.addPopup.form.id = item.id
-      this.addPopup.popup_type = 'MODIFY'
+      this.addPopup.popup_type = type
       this.addPopup.show = true      
       
+    },
+    openViewPopup(item){
+      this.openModifyPopup(item,'VIEW')
+    },
+    getPopupTitle(type){
+      if(type == 'ADD') return '사용자 등록'
+      if(type == 'MODIFY') return '사용자 수정'
+      if(type == 'VIEW') return '사용자 정보'
     },
     onChangeUserStatus(status) {
       this.addPopup.form.user_status = status

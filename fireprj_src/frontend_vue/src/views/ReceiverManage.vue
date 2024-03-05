@@ -55,6 +55,7 @@
           :search="receiver.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
+          @click:row="openViewPopup"
           class="elevation-1 mt-4 clickable-row">
           <template v-slot:[`item.fk_customer_idx`]="{item}">
             {{String(item.fk_customer_idx).padStart(5,'0')}}
@@ -69,7 +70,7 @@
             <v-btn depressed small color="#aaaaaa"
                     dark class="ml-1"
                     @click.stop
-                    @click="openModifyPopup(item)">
+                    @click="openModifyPopup(item,'MODIFY')">
               수정
             </v-btn>            
             <v-btn depressed small color="deep-orange accent-4"
@@ -83,7 +84,7 @@
         <v-dialog v-model="addPopup.show" persistent max-width="500px">
           <v-card :loading="loading" :disabled="loading">
             <v-card-title class="pt-2 pb-1 primary white--text">
-              <span class="body-1">{{(addPopup.popup_type == 'ADD')? '수신기 등록':'수신기 수정'}}</span>
+              <span class="body-1">{{getPopupTitle(addPopup.popup_type)}}</span>
             </v-card-title>
             <v-divider />
             <v-card-text>
@@ -104,6 +105,7 @@
                                   item-text="customer_name"
                                   item-value="customer_idx"
                                   @change="onChangeCustomer"
+                                  :disabled="addPopup.popup_type == 'VIEW'"
                                 >
                               </v-select>
                             </td>
@@ -129,13 +131,13 @@
                         <tr>
                           <th class="s-h" colspan="2" rowspan="1">수신기 타입</th>
                           <td colspan="2">
-                            <input type="text" placeholder="000" class="abl-input" v-model="addPopup.form.receiver_type"/>
+                            <input type="text" :disabled="addPopup.popup_type == 'VIEW'" placeholder="000" class="abl-input" v-model="addPopup.form.receiver_type"/>
                           </td>
                         </tr>       
                         <tr>
                           <th class="s-h" colspan="2" rowspan="1">수신기 번호</th>
                           <td colspan="2">
-                            <input type="text" placeholder="000" class="abl-input" v-model="addPopup.form.receiver_id"/>
+                            <input type="text" :disabled="addPopup.popup_type == 'VIEW'" placeholder="000" class="abl-input" v-model="addPopup.form.receiver_id"/>
                           </td>
                         </tr>                                                                                                                                                                                                                                                                 
                       </table>
@@ -160,8 +162,9 @@
                   dark
                   depressed
                   @click="addReceiver"
+                  v-if="addPopup.popup_type != 'VIEW'"
               >
-              {{(addPopup.popup_type == 'ADD')? '수신기 등록':'수신기 수정'}}
+              {{getPopupTitle(addPopup.popup_type)}}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -210,8 +213,8 @@ export default {
       this.addPopup.show = true
       
     },
-    openModifyPopup(item){
-      this.addPopup.popup_type = 'MODIFY'
+    openModifyPopup(item,type){
+      this.addPopup.popup_type = type
       this.addPopup.show = true
       this.addPopup.selected_custommer  = this.customer_list.find(v=>v.customer_idx==item.fk_customer_idx)
       this.updateCustomer(this.addPopup.selected_custommer)
@@ -220,6 +223,14 @@ export default {
       this.addPopup.form.receiver_idx = item.receiver_idx
       this.addPopup.form.id = item.id
     },
+    openViewPopup(item){
+      this.openModifyPopup(item,'VIEW')
+    },
+    getPopupTitle(type){
+      if(type == 'ADD') return '수신기 등록'
+      if(type == 'MODIFY') return '수신기 수정'
+      if(type == 'VIEW') return '수신기 정보'
+    },  
     clearPopup(){
       this.addPopup.form = {
           receiver_idx: '',

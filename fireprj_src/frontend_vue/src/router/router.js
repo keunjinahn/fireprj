@@ -129,7 +129,15 @@ const routes = [{
   path: '/user_manage',
   name: 'user_manage',
   component: View.UserManage,
-  meta: { breadcrumb: [{ text: 'CRM', disabled: true }, { text: '사용자 관리', disabled: true }] },
+  meta: { breadcrumb: [{ text: '사용자', disabled: true }, { text: '사용자 관리', disabled: true }] },
+  props: true,
+  beforeEnter
+},
+{
+  path: '/crm_manage',
+  name: 'crm_manage',
+  component: View.CrmManage,
+  meta: { breadcrumb: [{ text: '고객', disabled: true }, { text: '고객 관리', disabled: true }] },
   props: true,
   beforeEnter
 },

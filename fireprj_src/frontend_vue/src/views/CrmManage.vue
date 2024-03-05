@@ -8,7 +8,7 @@
 
         <v-card flat height="100">
           <v-toolbar rounded dense class="elevation-1" height="100">
-            <v-col cols="7">
+            <v-col cols="8">
               <v-text-field outlined dense hide-details
                             placeholder="고객사 검색"
                             append-icon="mdi-magnify"
@@ -33,6 +33,7 @@
                 <div class="ml-1">추가</div>
               </v-btn>
             </v-col>
+            <!--
             <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
@@ -42,6 +43,7 @@
                 <div class="ml-1">xls 다운로드</div>
               </v-btn>
             </v-col>
+          -->
           </v-toolbar>
         </v-card>
 
@@ -54,12 +56,13 @@
           :search="users.search"
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
+          @click:row="openViewPopup"
           class="elevation-1 mt-4 clickable-row">                   
           <template v-slot:[`item.delete`]="{item}">
             <v-btn depressed small color="#aaaaaa"
                     dark class="ml-1"
                     @click.stop
-                    @click="openModifyPopup(item)">
+                    @click="openModifyPopup(item,'MODIFY')">
               수정
             </v-btn>            
             <v-btn depressed small color="deep-orange accent-4"
@@ -89,19 +92,19 @@
                         <tr>
                             <th class="s-h" colspan="2" rowspan="1">고객사 이름</th>
                             <td colspan="2">
-                               <input type="text" placeholder="고객사 이름" class="abl-input" v-model="addPopup.form.customer_name"/>
+                               <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="고객사 이름" class="abl-input" v-model="addPopup.form.customer_name"/>
                             </td>
                         </tr>          
                         <tr>
                           <th class="s-h" colspan="2" rowspan="1">전화번호</th>
                           <td colspan="2">
-                            <input type="text" placeholder="전화번호" class="abl-input" v-model="addPopup.form.customer_tel"/>
+                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="전화번호" class="abl-input" v-model="addPopup.form.customer_tel"/>
                           </td>
                         </tr>   
                         <tr>
                           <th class="s-h" colspan="2" rowspan="1">주소</th>
                           <td colspan="2">
-                            <input type="text" placeholder="주소" class="abl-input" v-model="addPopup.form.customer_address"/>
+                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="주소" class="abl-input" v-model="addPopup.form.customer_address"/>
                           </td>
                         </tr>   
                       </table>
@@ -126,8 +129,10 @@
                   dark
                   depressed
                   @click="addUser()"
+                  v-if="addPopup.popup_type != 'VIEW'"
+                  
               >
-              {{(addPopup.popup_type == 'ADD')? '고객사 등록':'고객사 수정'}}
+              {{getPopupTitle(addPopup.popup_type)}}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -174,6 +179,7 @@ export default {
           customer_name: '',
           customer_tel: '',
           customer_address: '',
+
         }      
     },
     openAddPopup() {
@@ -182,14 +188,23 @@ export default {
       this.addPopup.popup_type = 'ADD'
       this.addPopup.show = true
     },
-    openModifyPopup(item) {
+    openModifyPopup(item,type) {
       this.addPopup.form.customer_name = item.customer_name
       this.addPopup.form.customer_tel = item.customer_tel
       this.addPopup.form.customer_address = item.customer_address
-      this.addPopup.popup_type = 'MODIFY'
+      this.addPopup.popup_type = type
+      this.addPopup.form.customer_idx = item.customer_idx
       this.addPopup.show = true      
       
     },   
+    openViewPopup(item){
+      this.openModifyPopup(item,'VIEW')
+    },
+    getPopupTitle(type){
+      if(type == 'ADD') return '고객 등록'
+      if(type == 'MODIFY') return '고객 수정'
+      if(type == 'VIEW') return '고객 정보'
+    },
     async getUser() {
       
       const { page, itemsPerPage, sortBy, sortDesc } = this.users.options;
