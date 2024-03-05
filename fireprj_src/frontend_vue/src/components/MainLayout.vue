@@ -106,6 +106,15 @@
             <v-list-item-title>{{ navLinks[4].text }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+
+        <v-list-item v-once :to="{name: navLinks[5].subLinks[0].route}" color="primary">
+          <v-list-item-avatar>
+            <v-icon>{{ navLinks[5].icon }}</v-icon>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>{{ navLinks[5].text }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
       
     </v-navigation-drawer>
@@ -182,6 +191,13 @@ export default {
         text: "사용자",
         subLinks: [
           { text: "사용자 관리", route: "user_manage"},
+        ]
+      },
+      {
+        icon: "mdi-account-plus",
+        text: "CRM",
+        subLinks: [
+          { text: "CRM 관리", route: "crm_manage"},
         ]
       },
     ],
