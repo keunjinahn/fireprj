@@ -48,17 +48,17 @@
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           class="elevation-1 mt-4">
           <template v-slot:item="row">
-            <tr class="clickable-row" @click="onSensorItemClick(row.item)">
-              <td >{{ row.item.id }}</td>
+            <tr @click="onSensorItemClick(row.item,row)" :class="{'row-active': row.item.id == sensor.selectedId}">
+              <td >{{ row.item._index }}</td>
               <td >{{ row.item.last_event_time | moment('YYYY-MM-DD HH:mm:ss')}}</td>
               <td >{{ String(row.item.fk_customer_idx).padStart(5,'0') }}</td>
               <td >{{ row.item.customer.customer_name }}</td>
               <td >{{ $session.receiver_type_list.find(v=>v.code==row.item.receiver.receiver_type).name }}</td>
-              <td >{{ String(row.item.receiver_id).padStart(3,'0') }}</td>
+              <td>{{ String(row.item.receiver_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.system_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.sensor_id).padStart(3,'0') }}</td>
-              <td>
+              <td >
                 <div v-if="row.item.register_status" class="blue-circle"></div>
                 <div v-else class="red-circle"></div>
               </td>
@@ -66,7 +66,7 @@
                 <div v-if="row.item.action_status" class="blue-circle"></div>
                 <div v-else class="red-circle"></div>
               </td>
-              <td>
+              <td >
                 <div v-if="row.item.com_status" class="blue-circle"></div>
                 <div v-else class="red-circle"></div>
               </td>
@@ -133,7 +133,7 @@ export default {
             order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
           }
         }else{
-          order_by.push({field: "id", direction: 'asc'})
+          order_by.push({field: "last_event_time", direction: 'desc'})
         }
 
         let q = {
@@ -160,6 +160,7 @@ export default {
       }   
     },
     async onSensorItemClick(item){
+      this.sensor.selectedId = item.id
       const { page, itemsPerPage, sortBy, sortDesc } = this.event.options;
       try {
         let filters_or = []
@@ -244,6 +245,7 @@ export default {
   data() {
     return {
       sensor: {
+        selectedId: '',
         headers: [
           {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
           {text: "이벤트 시간", value: "event_datetime", sortable: false,align: 'center', width: 80}, 
@@ -305,7 +307,9 @@ export default {
 td {
   text-align: center;
 }
-
+.main-panel .v-data-table{
+  cursor:pointer
+}
 .flex-grow-1{
   margin-left:10px;
   margin-bottom: 10px;

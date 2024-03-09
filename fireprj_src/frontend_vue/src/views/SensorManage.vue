@@ -368,7 +368,7 @@ export default {
             order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
           }
         }else{
-          order_by.push({field: "id", direction: 'asc'})
+          order_by.push({field: "last_event_time", direction: 'desc'})
         }
 
         let q = {

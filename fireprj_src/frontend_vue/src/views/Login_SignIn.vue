@@ -3,7 +3,7 @@
     <div class="login-panel">
       <div class="login-panel-inner">
         <div class="login-legend">
-          <h1>리더스테크 통합화재<br> 감지 시스템 플랫폼</h1>
+          <h1>(주)리더스테크<br>통합 화재 감지 시스템</h1>
         </div>
         <div class="login-input-wrap">
             <div class="login-inner">

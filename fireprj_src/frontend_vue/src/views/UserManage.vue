@@ -226,6 +226,8 @@ export default {
     openModifyPopup(item,type) {
       this.addPopup.selected_status = this.user_status_list.find(v => v.code == item.user_status)
       this.addPopup.selected_role = this.user_role_list.find(v => v.code == item.user_role)
+      this.addPopup.form.user_status = this.addPopup.selected_status.code
+      this.addPopup.form.user_role = this.addPopup.selected_role.code
       this.addPopup.form.user_id = item.user_id
       this.addPopup.form.user_pwd = '*****'
       this.addPopup.form.user_name = item.user_name
