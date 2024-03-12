@@ -300,6 +300,7 @@ def make_excel_api():
         'repeater_event': FireRepeaterTbl(),
         'event_list': EventTbl(),
         'user': UserTbl(),
+        'crm': CustomerTbl(),
     }
     target_db = db_router[page]
     db_data = target_db.query.all()
@@ -329,6 +330,7 @@ def make_excel_api():
     if page == 'repeater_manage': ws.column_dimensions['A'].width = 17
     if page == 'receiver_manage': ws.column_dimensions['A'].width = 14
     if page == 'event_list': ws.column_dimensions['G'].width = 50
+    if page == 'crm': ws.column_dimensions['C'].width = 50
     if page == 'sensor_event':
         ws.column_dimensions['A'].width = 23
         ws.column_dimensions['K'].width = 18
@@ -429,3 +431,14 @@ def sensor_data_range_api():
         "sensor_rt_data_list":sensor_value_list,
     }
     return make_response(jsonify(result_obj), 200)    
+
+@app.route('/api/v1/check_passwd', methods=['POST'])
+def check_passwd_api():
+    print("check_passwd...")
+    input = json.loads(request.data)
+    user_pwd = input['user_pwd']
+    user_id = input['user_id']
+    find_user = UserTbl.query.filter_by(user_id=user_id).filter_by(user_pwd=password_encoder_512(user_pwd)).first()
+    if find_user is not None :
+        return make_response(jsonify({"result":1}), 200)   
+    return make_response(jsonify({"result":0}), 200)   

@@ -33,7 +33,6 @@
                 <div class="ml-1">추가</div>
               </v-btn>
             </v-col>
-            <!--
             <v-col cols="1">
               <v-btn depressed dark big
                       color="light-blue darken-2"
@@ -43,7 +42,7 @@
                 <div class="ml-1">xls 다운로드</div>
               </v-btn>
             </v-col>
-          -->
+         
           </v-toolbar>
         </v-card>
 
@@ -77,7 +76,7 @@
         <v-dialog v-model="addPopup.show" persistent max-width="500px">
           <v-card :loading="loading" :disabled="loading">
             <v-card-title class="pt-2 pb-1 primary white--text">
-              <span class="body-1">{{(addPopup.popup_type == 'ADD')? '고객사 등록':'고객사 수정'}}</span>
+              <span class="body-1">{{getPopupTitle(addPopup.popup_type)}}</span>
             </v-card-title>
             <v-divider />
             <v-card-text>
@@ -183,12 +182,20 @@ export default {
         }      
     },
     openAddPopup() {
+      if(!this.$session.isAdmin()){
+        alert("권한이 없습니다.")
+        return
+      }        
       this.clearUser()
       this.getUser()
       this.addPopup.popup_type = 'ADD'
       this.addPopup.show = true
     },
     openModifyPopup(item,type) {
+      if(!this.$session.isAdmin()){
+        alert("권한이 없습니다.")
+        return
+      }        
       this.addPopup.form.customer_name = item.customer_name
       this.addPopup.form.customer_tel = item.customer_tel
       this.addPopup.form.customer_address = item.customer_address
@@ -201,9 +208,9 @@ export default {
       this.openModifyPopup(item,'VIEW')
     },
     getPopupTitle(type){
-      if(type == 'ADD') return '고객 등록'
-      if(type == 'MODIFY') return '고객 수정'
-      if(type == 'VIEW') return '고객 정보'
+      if(type == 'ADD') return '고객사 등록'
+      if(type == 'MODIFY') return '고객사 수정'
+      if(type == 'VIEW') return '고객사 정보'
     },
     async getUser() {
       
@@ -271,6 +278,10 @@ export default {
     //   this.infoPopup.show = false;
     // },
     openDeletePopup(item) {
+      if(!this.$session.isAdmin()){
+        alert("권한이 없습니다.")
+        return
+      }        
       this.deletePopup.delTarget = item.customer_idx;
       this.deletePopup.show = true;
     },
@@ -280,37 +291,37 @@ export default {
       this.getUser()
       this.deletePopup.show = false;
     },
-    // async downloadExcel() {
-    //   let params = {
-    //     "page_name": "user",
-    //     "headers": (() => {
-    //       let headers_text = []
-    //       for (let i=1; i < this.users.headers.length-1; i++) {
-    //         headers_text.push(this.users.headers[i].text)
-    //       }
-    //       return headers_text
-    //     })()
-    //   }
-    //   let {data} = await this.$http.post('make_excel', params)
+    async downloadExcel() {
+      let params = {
+        "page_name": "crm",
+        "headers": (() => {
+          let headers_text = []
+          for (let i=1; i < this.users.headers.length-1; i++) {
+            headers_text.push(this.users.headers[i].text)
+          }
+          return headers_text
+        })()
+      }
+      let {data} = await this.$http.post('make_excel', params)
 
-    //   var url = this.$session.getWebURL() + '/api/v1/save_excel/' + data.filename
-    //   axios({
-    //     method: 'get',
-    //     url:url,
-    //     responseType: 'blob'
-    //   })
-    //   .then(response => {
-    //     const url = window.URL.createObjectURL(new Blob([response.data], {
-    //       type: 'application/vnd.ms-excel'
-    //     }))
-    //     const link = document.createElement('a')
-    //     link.href = url
-    //     var download_file_name = "사용자목록_" + Date.now().toString() + ".xlsx"
-    //     link.setAttribute('download', download_file_name)
-    //     link.click()
-    //   })
-    //   .catch(() => console.log('error: excel download error'))
-    // }
+      var url = this.$session.getWebURL() + '/api/v1/save_excel/' + data.filename
+      axios({
+        method: 'get',
+        url:url,
+        responseType: 'blob'
+      })
+      .then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data], {
+          type: 'application/vnd.ms-excel'
+        }))
+        const link = document.createElement('a')
+        link.href = url
+        var download_file_name = "고객사목록_" + Date.now().toString() + ".xlsx"
+        link.setAttribute('download', download_file_name)
+        link.click()
+      })
+      .catch(() => console.log('error: excel download error'))
+    }
   },
   mounted() {
     this.getUser()

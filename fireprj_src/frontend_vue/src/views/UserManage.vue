@@ -102,7 +102,19 @@
                                <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="영문 아이디" class="abl-input" v-model="addPopup.form.user_id"/>
                             </td>
                         </tr>          
-                        <tr>
+                        <tr v-if="addPopup.popup_type == 'MODIFY'">
+                          <th class="s-h" colspan="2" rowspan="1">현재 비밀번호</th>
+                          <td colspan="2">
+                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd_c"/>
+                          </td>
+                        </tr>           
+                        <tr v-if="addPopup.popup_type == 'MODIFY'">
+                          <th class="s-h" colspan="2" rowspan="1">변경 비밀번호</th>
+                          <td colspan="2">
+                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd"/>
+                          </td>
+                        </tr>                                       
+                        <tr v-else>
                           <th class="s-h" colspan="2" rowspan="1">사용자 비밀번호</th>
                           <td colspan="2">
                             <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd"/>
@@ -123,7 +135,7 @@
                                   item-text="name"
                                   item-value="code"
                                   @change="onChangeUserStatus"
-                                  :disabled="addPopup.popup_type == 'VIEW'"
+                                  :disabled="addPopup.popup_type == 'VIEW' || !$session.isAdmin()"
                                 >
                               </v-select>
                           </td>
@@ -137,7 +149,7 @@
                                   item-text="name"
                                   item-value="code"
                                   @change="onChangeUserRole"
-                                  :disabled="addPopup.popup_type == 'VIEW'"
+                                  :disabled="addPopup.popup_type == 'VIEW' || !$session.isAdmin()"
                                 >
                               </v-select>
                           </td>
@@ -211,29 +223,43 @@ export default {
       this.addPopup.form =  {
           user_id: '',
           user_pwd: '',
+          user_pwd_c: '',
           user_name: '',
           user_status: '',
           user_role: '',
         }      
     },
     openAddPopup() {
+      if(!this.$session.isAdmin()){
+        alert("권한이 없습니다.")
+        return
+      }      
       this.clearUser()
       this.addPopup.selected_status = this.user_status_list[0]
       this.addPopup.selected_role = this.user_role_list[0]
       this.addPopup.popup_type = 'ADD'
+      this.addPopup.form.user_status = this.addPopup.selected_status.code
+      this.addPopup.form.user_role = this.addPopup.selected_role.code            
       this.addPopup.show = true
+
     },
     openModifyPopup(item,type) {
-      this.addPopup.selected_status = this.user_status_list.find(v => v.code == item.user_status)
-      this.addPopup.selected_role = this.user_role_list.find(v => v.code == item.user_role)
-      this.addPopup.form.user_status = this.addPopup.selected_status.code
-      this.addPopup.form.user_role = this.addPopup.selected_role.code
-      this.addPopup.form.user_id = item.user_id
-      this.addPopup.form.user_pwd = '*****'
-      this.addPopup.form.user_name = item.user_name
-      this.addPopup.form.id = item.id
-      this.addPopup.popup_type = type
-      this.addPopup.show = true      
+      if(this.$session.isAdmin() || (!this.$session.isAdmin() && this.$session.getUserId() == item.user_id)){
+        this.addPopup.selected_status = this.user_status_list.find(v => v.code == item.user_status)
+        this.addPopup.selected_role = this.user_role_list.find(v => v.code == item.user_role)
+        this.addPopup.form.user_status = this.addPopup.selected_status.code
+        this.addPopup.form.user_role = this.addPopup.selected_role.code
+        this.addPopup.form.user_id = item.user_id
+        this.addPopup.form.user_pwd = '*****'
+        this.addPopup.form.user_pwd_c = '*****'
+        this.addPopup.form.user_name = item.user_name
+        this.addPopup.form.id = item.id
+        this.addPopup.popup_type = type
+        this.addPopup.show = true      
+      }else{
+        alert("권한이 없습니다.")
+        return
+      }      
       
     },
     openViewPopup(item){
@@ -301,6 +327,19 @@ export default {
       if (this.addPopup.popup_type == 'ADD') {
         await this.$http.post("user", param)
       } else {
+        if(this.addPopup.form.user_pwd != '*****') {
+          let param_pwd = {
+            user_id: this.addPopup.form.user_id,
+            user_pwd: this.addPopup.form.user_pwd_c,          
+          }
+          let res = await this.$http.post("check_passwd", param_pwd)
+          if(res.data.result == 0){
+            alert('기존 패스워드와 일치하지 않습니다.')    
+            return
+          }
+        }
+        if(this.addPopup.form.user_pwd == '*****')
+          delete param['user_pwd']
         await this.$http.patch(`user/${this.addPopup.form.id}`, param)  
       }
       this.getUser()
@@ -318,6 +357,10 @@ export default {
     //   this.infoPopup.show = false;
     // },
     openDeletePopup(item) {
+      if(!this.$session.isAdmin()){
+        alert("권한이 없습니다.")
+        return
+      }      
       this.deletePopup.delTarget = item.id;
       this.deletePopup.show = true;
     },
@@ -394,6 +437,7 @@ export default {
         form: {
           user_id: '',
           user_pwd: '',
+          user_pwd_c: '',
           user_name: '',
           user_status: '',
           user_role: '',

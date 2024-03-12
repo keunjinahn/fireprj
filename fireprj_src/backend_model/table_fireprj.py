@@ -103,6 +103,7 @@ class UserTbl(db.Model):
             , "user_id": self.user_id
             , "user_name": self.user_name
             , "user_status": self.user_status
+            , "user_role": self.user_role
             , "token": self.token
         }
         return resultJSON    

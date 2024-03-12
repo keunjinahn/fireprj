@@ -71,7 +71,7 @@ export default new Vue({
     isAdmin() {
       let user = JSON.parse(sessionStorage.getItem('user'))
       if (user != undefined
-        && user.user_type == 1)
+        && user.user_role == 1)
         return true
       return false
     },

@@ -108,7 +108,7 @@
                                   item-text="customer_name"
                                   item-value="customer_idx"
                                   @change="onChangeCustomer"
-                                  :disabled="addPopup.popup_type == 'VIEW'"
+                                  :disabled="addPopup.popup_type != 'ADD'"
                                 >
                               </v-select>
                             </td>
@@ -277,6 +277,10 @@ export default {
   components: {},
   methods: {
     openAddPopup(){
+      if(!this.$session.isAdmin()){
+        alert("권한이 없습니다.")
+        return
+      }      
       this.clearPopup();
       this.getCustomer();
       this.addPopup.popup_type = 'ADD'
@@ -284,6 +288,10 @@ export default {
       
     },
     openModifyPopup(item ,type){
+      if(!this.$session.isAdmin()){
+        alert("권한이 없습니다.")
+        return
+      }      
       this.addPopup.popup_type = type
       this.addPopup.show = true
       this.addPopup.selected_custommer = this.customer_list.find(v=>v.customer_idx==item.fk_customer_idx)
@@ -408,6 +416,10 @@ export default {
       this.infoPopup.show = false;
     },
     openDeletePopup(item) {
+      if(!this.$session.isAdmin()){
+        alert("권한이 없습니다.")
+        return
+      }      
       this.deletePopup.delTarget = item.id;
       this.deletePopup.show = true;
     },
