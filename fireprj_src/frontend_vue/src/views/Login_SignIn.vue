@@ -3,7 +3,7 @@
     <div class="login-panel">
       <div class="login-panel-inner">
         <div class="login-legend">
-          <h1>리더스테크 통합화재<br> 감지 시스템 플랫폼</h1>
+          <h1>(주)리더스테크<br>통합 화재 감지 시스템</h1>
         </div>
         <div class="login-input-wrap">
             <div class="login-inner">
@@ -56,7 +56,7 @@ export default {
         if (data.status) {
           this.$session.login(data)
           await this.$session.setToken(data.user)
-          this.$router.push('/manage/sensor_manage')
+          this.$router.push('/monitor/sensor_event')
         }else {
           if (data.reason == 1) {
             alert('로그인이 실패(아이디를 확인하여주세요!)')

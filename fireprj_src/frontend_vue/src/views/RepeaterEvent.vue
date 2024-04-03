@@ -36,8 +36,7 @@
             </v-col>
           </v-toolbar>
         </v-card>
-
-        <v-data-table
+          <v-data-table
           :headers="repeater.headers"
           :items="repeater.data"
           :loading="repeater.loading"
@@ -45,11 +44,48 @@
           :server-items-length="repeater.total"
           :search="repeater.search"
           :items-per-page="5"
+          single-select
+          item-key="id"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
-          class="elevation-1 mt-4">
+          
+          class="elevation-1 mt-4 ">
           <template v-slot:item="row">
-            <tr class="clickable-row" @click="onRepeaterItemClick(row.item)">
-              <td >{{ row.item.id }}</td>
+            <tr @click="onRepeaterItemClick(row.item,row)" :class="{'row-active': row.item.id == repeater.selectedId}">
+              <td >{{ row.item._index }}</td>
+              <td >{{ row.item.last_event_time | moment('YYYY-MM-DD HH:mm:ss')}}</td>
+              <td >{{ String(row.item.fk_customer_idx).padStart(5,'0') }}</td>
+              <td >{{ row.item.customer.customer_name }}</td>
+              <td >{{ $session.receiver_type_list.find(v=>v.code==row.item.receiver.receiver_type).name }}</td>
+              <td >{{ String(row.item.receiver_id).padStart(3,'0') }}</td>
+              <td >{{ String(row.item.system_id).padStart(3,'0') }}</td>
+              <td>{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
+              <td >
+                <div v-if="row.item.register_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
+              </td>
+              <td >
+                <div v-if="row.item.action_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
+              </td>
+              <td >
+                <div v-if="row.item.com_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
+              </td>
+              <td >
+                <div v-if="row.item.battery_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
+              </td>                
+            </tr>
+          </template>
+          <!-- <template v-slot:[`item._index`]="{ item }">
+            <td class="t-center" :class="{'row-active': item.id == repeater.selectedId}">{{ item._index }}</td>
+          </template>
+          <template v-slot:[`item.last_event_time`]="{ item }">
+            <td :class="{'row-active': item.id == repeater.selectedId}">{{ item.last_event_time | moment('YYYY-MM-DD HH:mm:ss')}}</td>
+          </template>           -->
+          <!-- <template v-slot:item="row">
+            <tr class="clickable-row"   @click="onRepeaterItemClick(row.item,row)">
+              <td :class="{'row-active': row.item.id == repeater.selectedId}">{{ row.item._index }}</td>
               <td >{{ row.item.last_event_time | moment('YYYY-MM-DD HH:mm:ss')}}</td>
               <td >{{ String(row.item.fk_customer_idx).padStart(5,'0') }}</td>
               <td >{{ row.item.customer.customer_name }}</td>
@@ -58,28 +94,31 @@
               <td >{{ String(row.item.system_id).padStart(3,'0') }}</td>
               <td >{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
               <td>
-                <div v-if="row.item.register_status" class="normal-blue-circle"></div>
-                <div v-else class="anomal-circle"></div>
+                <div v-if="row.item.register_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
               </td>
               <td >
-                <div v-if="row.item.action_status" class="normal-red-circle"></div>
-                <div v-else class="anomal-circle"></div>
+                <div v-if="row.item.action_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
               </td>
               <td>
-                <div v-if="row.item.com_status" class="normal-red-circle"></div>
-                <div v-else class="anomal-circle"></div>
+                <div v-if="row.item.com_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
               </td>
               <td >
-                <div v-if="row.item.battery_status" class="normal-red-circle"></div>
-                <div v-else class="anomal-circle"></div>
-              </td>              
+                <div v-if="row.item.battery_status" class="blue-circle"></div>
+                <div v-else class="red-circle"></div>
+              </td>   
+        
             </tr>
-          </template>
+          </template> -->
         </v-data-table>
+        
         <v-toolbar color="light-blue darken-1" dark flat>
           <v-toolbar-title>중계기 이벤트 상세</v-toolbar-title>
         </v-toolbar>         
         <v-data-table
+        
         :headers="event.headers"
         :items="event.data"
         :loading="event.loading"
@@ -132,7 +171,7 @@ export default {
             order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
           }
         }else{
-          order_by.push({field: "id", direction: 'asc'})
+          order_by.push({field: "last_event_time", direction: 'desc'})
         }
         let q = {
           filters: [{or: filters_or}, {and: filters_and}],
@@ -148,6 +187,7 @@ export default {
         this.repeater.total = data.num_results;
         this.repeater.data = data.objects.map((v, i) => {
           v._index = i + (page - 1) * itemsPerPage + 1;
+          
           return v;
         });
       } catch (err) {
@@ -156,7 +196,10 @@ export default {
         this.repeater.loading = false;
       }   
     },
-    async onRepeaterItemClick(item){
+    async onRepeaterItemClick(item,row){
+      this.repeater.selectedId = item.id
+      if(row != null)
+        row.select(true);
       const { page, itemsPerPage, sortBy, sortDesc } = this.event.options;
       try {
         let filters_or = []
@@ -233,7 +276,8 @@ export default {
     },
     "event.options": {
       handler() {
-        this.onRepeaterItemClick(this.selected_repeater)
+        if(this.selected_repeater != undefined)
+          this.onRepeaterItemClick(this.selected_repeater,null)
       },
       deep: true,
     },    
@@ -241,8 +285,10 @@ export default {
   data() {
     return {
       repeater: {
+        selectedId: '',
+        singleSelect: false,        
         headers: [
-          {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
+          {text: 'No.', value: '_index', sortable: false, align: 'center', width: 20 },
           {text: "이벤트 시간", value: "last_event_time", sortable: false,align: 'center', width: 80}, 
           {text: "고객 식별자", value: "fk_customer_idx",align: 'center', sortable: false, width: 60},
           {text: "고객명", value: "customer.customer_name",align: 'center', sortable: false, width: 40},
@@ -301,43 +347,13 @@ export default {
 td {
   text-align: center;
 }
+.main-panel .v-data-table{
+  cursor:pointer
+}
 
 .flex-grow-1{
   margin-left:10px;
   margin-bottom: 10px;
   width:48%;
-}
-
-.normal-blue-circle
-{
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid;
-  background-color: #0026ff;
-  opacity: 0.3;
-  margin: auto;
-  border: 2px solid rgb(0, 0, 0);
-}
-.normal-red-circle
-{
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid;
-  background-color: #ff0000;
-  opacity: 0.3;
-  margin: auto;
-  border: 2px solid rgb(0, 0, 0);
-}
-.anomal-circle
-{
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid;
-  background-color: #c8c8c8;
-  opacity: 0.3;
-  margin: auto;
 }
 </style>

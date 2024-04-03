@@ -3,14 +3,14 @@
     <template v-slot>
       <div class="main-panel">
         <v-toolbar color="light-blue darken-4" dark flat>
-          <v-toolbar-title>사용자 관리</v-toolbar-title>
+          <v-toolbar-title>고객사 관리</v-toolbar-title>
         </v-toolbar>
 
         <v-card flat height="100">
           <v-toolbar rounded dense class="elevation-1" height="100">
-            <v-col cols="7">
+            <v-col cols="8">
               <v-text-field outlined dense hide-details
-                            placeholder="사용자 검색"
+                            placeholder="고객사 검색"
                             append-icon="mdi-magnify"
                             v-model="users.search"
                             @keydown.enter="getUser()"
@@ -42,6 +42,7 @@
                 <div class="ml-1">xls 다운로드</div>
               </v-btn>
             </v-col>
+         
           </v-toolbar>
         </v-card>
 
@@ -55,16 +56,7 @@
           :items-per-page="5"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           @click:row="openViewPopup"
-          class="elevation-1 mt-4 clickable-row">
-          <template v-slot:[`item.user_pwd`]="{item}">
-            *****
-          </template>           
-          <template v-slot:[`item.user_status`]="{item}">
-            {{user_status_list.find(v=>v.code==item.user_status).name}}
-          </template>           
-          <template v-slot:[`item.user_role`]="{item}">
-            {{user_role_list.find(v=>v.code==item.user_role).name}}
-          </template>                     
+          class="elevation-1 mt-4 clickable-row">                   
           <template v-slot:[`item.delete`]="{item}">
             <v-btn depressed small color="#aaaaaa"
                     dark class="ml-1"
@@ -97,63 +89,23 @@
                           <col style="width: 25%" />
                         </colgroup>
                         <tr>
-                            <th class="s-h" colspan="2" rowspan="1">사용자 식별자</th>
+                            <th class="s-h" colspan="2" rowspan="1">고객사 이름</th>
                             <td colspan="2">
-                               <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="영문 아이디" class="abl-input" v-model="addPopup.form.user_id"/>
+                               <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="고객사 이름" class="abl-input" v-model="addPopup.form.customer_name"/>
                             </td>
                         </tr>          
-                        <tr v-if="addPopup.popup_type == 'MODIFY'">
-                          <th class="s-h" colspan="2" rowspan="1">현재 비밀번호</th>
+                        <tr>
+                          <th class="s-h" colspan="2" rowspan="1">전화번호</th>
                           <td colspan="2">
-                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd_c"/>
-                          </td>
-                        </tr>           
-                        <tr v-if="addPopup.popup_type == 'MODIFY'">
-                          <th class="s-h" colspan="2" rowspan="1">변경 비밀번호</th>
-                          <td colspan="2">
-                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd"/>
-                          </td>
-                        </tr>                                       
-                        <tr v-else>
-                          <th class="s-h" colspan="2" rowspan="1">사용자 비밀번호</th>
-                          <td colspan="2">
-                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="*******" class="abl-input" v-model="addPopup.form.user_pwd"/>
+                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="전화번호" class="abl-input" v-model="addPopup.form.customer_tel"/>
                           </td>
                         </tr>   
                         <tr>
-                          <th class="s-h" colspan="2" rowspan="1">사용자 성명</th>
+                          <th class="s-h" colspan="2" rowspan="1">주소</th>
                           <td colspan="2">
-                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="사용자 성명" class="abl-input" v-model="addPopup.form.user_name"/>
+                            <input :disabled="addPopup.popup_type == 'VIEW'" type="text" placeholder="주소" class="abl-input" v-model="addPopup.form.customer_address"/>
                           </td>
                         </tr>   
-                        <tr>
-                          <th class="s-h" colspan="2" rowspan="1">사용자 상태</th>
-                          <td colspan="2">
-                              <v-select dense hide-details
-                                  v-model="addPopup.selected_status"
-                                  :items="user_status_list"
-                                  item-text="name"
-                                  item-value="code"
-                                  @change="onChangeUserStatus"
-                                  :disabled="addPopup.popup_type == 'VIEW' || !$session.isAdmin()"
-                                >
-                              </v-select>
-                          </td>
-                        </tr>     
-                        <tr>
-                          <th class="s-h" colspan="2" rowspan="1">사용자 권한</th>
-                          <td colspan="2">
-                              <v-select dense hide-details
-                                  v-model="addPopup.selected_role"
-                                  :items="user_role_list"
-                                  item-text="name"
-                                  item-value="code"
-                                  @change="onChangeUserRole"
-                                  :disabled="addPopup.popup_type == 'VIEW' || !$session.isAdmin()"
-                                >
-                              </v-select>
-                          </td>
-                        </tr>       
                       </table>
                     </abl-doc-body>
                   </abl-document>                                   
@@ -175,8 +127,9 @@
                   tile
                   dark
                   depressed
-                  @click="addUser"
+                  @click="addUser()"
                   v-if="addPopup.popup_type != 'VIEW'"
+                  
               >
               {{getPopupTitle(addPopup.popup_type)}}
               </v-btn>
@@ -221,79 +174,62 @@ export default {
   methods: {
     clearUser() {
       this.addPopup.form =  {
-          user_id: '',
-          user_pwd: '',
-          user_pwd_c: '',
-          user_name: '',
-          user_status: '',
-          user_role: '',
+          customer_idx:0,
+          customer_name: '',
+          customer_tel: '',
+          customer_address: '',
+
         }      
     },
     openAddPopup() {
       if(!this.$session.isAdmin()){
         alert("권한이 없습니다.")
         return
-      }      
+      }        
       this.clearUser()
-      this.addPopup.selected_status = this.user_status_list[0]
-      this.addPopup.selected_role = this.user_role_list[0]
+      this.getUser()
       this.addPopup.popup_type = 'ADD'
-      this.addPopup.form.user_status = this.addPopup.selected_status.code
-      this.addPopup.form.user_role = this.addPopup.selected_role.code            
       this.addPopup.show = true
-
     },
     openModifyPopup(item,type) {
-      if(this.$session.isAdmin() || (!this.$session.isAdmin() && this.$session.getUserId() == item.user_id)){
-        this.addPopup.selected_status = this.user_status_list.find(v => v.code == item.user_status)
-        this.addPopup.selected_role = this.user_role_list.find(v => v.code == item.user_role)
-        this.addPopup.form.user_status = this.addPopup.selected_status.code
-        this.addPopup.form.user_role = this.addPopup.selected_role.code
-        this.addPopup.form.user_id = item.user_id
-        this.addPopup.form.user_pwd = '*****'
-        this.addPopup.form.user_pwd_c = '*****'
-        this.addPopup.form.user_name = item.user_name
-        this.addPopup.form.id = item.id
-        this.addPopup.popup_type = type
-        this.addPopup.show = true      
-      }else{
+      if(!this.$session.isAdmin()){
         alert("권한이 없습니다.")
         return
-      }      
+      }        
+      this.addPopup.form.customer_name = item.customer_name
+      this.addPopup.form.customer_tel = item.customer_tel
+      this.addPopup.form.customer_address = item.customer_address
+      this.addPopup.popup_type = type
+      this.addPopup.form.customer_idx = item.customer_idx
+      this.addPopup.show = true      
       
-    },
+    },   
     openViewPopup(item){
       this.openModifyPopup(item,'VIEW')
     },
     getPopupTitle(type){
-      if(type == 'ADD') return '사용자 등록'
-      if(type == 'MODIFY') return '사용자 수정'
-      if(type == 'VIEW') return '사용자 정보'
+      if(type == 'ADD') return '고객사 등록'
+      if(type == 'MODIFY') return '고객사 수정'
+      if(type == 'VIEW') return '고객사 정보'
     },
-    onChangeUserStatus(status) {
-      this.addPopup.form.user_status = status
-    },
-    onChangeUserRole(role) {
-      this.addPopup.form.user_role = role
-    },    
     async getUser() {
-
+      
       const { page, itemsPerPage, sortBy, sortDesc } = this.users.options;
       try {
         let filters_or = []
         let filters_and = []
         let order_by = []
         if (this.users.search) {
-          filters_or.push({name: 'user_id', op: 'like', val: `%${this.users.search}%`})
+          filters_or.push({name: 'customer_name', op: 'like', val: `%${this.users.search}%`})
         }
         if (sortBy.length) {
           for (let i=0; i<sortBy.length; i++) {
             order_by.push({field: sortBy[i], direction: sortDesc[i] ? 'desc' : 'asc'})
           }
         }else{
-          order_by.push({field: "id", direction: 'asc'})
+          order_by.push({field: "customer_idx", direction: 'asc'})
         }
-
+        
         let q = {
           filters: [{or: filters_or}, {and: filters_and}],
           order_by
@@ -303,8 +239,8 @@ export default {
           results_per_page: itemsPerPage,
           page: page,
         };
-
-        let { data } = await this.$http.get("user", { params });
+        
+        let { data } = await this.$http.get("customer", { params });
         this.users.total = data.num_results;
         this.users.data = data.objects.map((v, i) => {
           v._index = i + (page - 1) * itemsPerPage + 1;
@@ -318,29 +254,14 @@ export default {
     },
     async addUser() {
       let param = {
-        user_id: this.addPopup.form.user_id,
-        user_pwd: this.addPopup.form.user_pwd,
-        user_name: this.addPopup.form.user_name,
-        user_status: this.addPopup.form.user_status,
-        user_role: this.addPopup.form.user_role,
+        customer_name: this.addPopup.form.customer_name,
+        customer_tel: this.addPopup.form.customer_tel,
+        customer_address: this.addPopup.form.customer_address,
       }
       if (this.addPopup.popup_type == 'ADD') {
-        await this.$http.post("user", param)
+        await this.$http.post("customer", param)
       } else {
-        if(this.addPopup.form.user_pwd != '*****') {
-          let param_pwd = {
-            user_id: this.addPopup.form.user_id,
-            user_pwd: this.addPopup.form.user_pwd_c,          
-          }
-          let res = await this.$http.post("check_passwd", param_pwd)
-          if(res.data.result == 0){
-            alert('기존 패스워드와 일치하지 않습니다.')    
-            return
-          }
-        }
-        if(this.addPopup.form.user_pwd == '*****')
-          delete param['user_pwd']
-        await this.$http.patch(`user/${this.addPopup.form.id}`, param)  
+        await this.$http.patch(`customer/${this.addPopup.form.customer_idx}`, param)  
       }
       this.getUser()
       this.addPopup.show = false;
@@ -360,19 +281,19 @@ export default {
       if(!this.$session.isAdmin()){
         alert("권한이 없습니다.")
         return
-      }      
-      this.deletePopup.delTarget = item.id;
+      }        
+      this.deletePopup.delTarget = item.customer_idx;
       this.deletePopup.show = true;
     },
     async deleteUser() {
       let param = this.deletePopup.delTarget;
-      await this.$http.delete(`user/${param}`)
+      await this.$http.delete(`customer/${param}`)
       this.getUser()
       this.deletePopup.show = false;
     },
     async downloadExcel() {
       let params = {
-        "page_name": "user",
+        "page_name": "crm",
         "headers": (() => {
           let headers_text = []
           for (let i=1; i < this.users.headers.length-1; i++) {
@@ -395,7 +316,7 @@ export default {
         }))
         const link = document.createElement('a')
         link.href = url
-        var download_file_name = "사용자목록_" + Date.now().toString() + ".xlsx"
+        var download_file_name = "고객사목록_" + Date.now().toString() + ".xlsx"
         link.setAttribute('download', download_file_name)
         link.click()
       })
@@ -417,12 +338,10 @@ export default {
     return {
       users: {
         headers: [
-          {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
-          {text: '사용자 식별자', value: 'user_id', sortable: false,align: 'center', width: 80},
-          {text: "사용자 비밀번호", value: "user_pwd",align: 'center', sortable: false, width: 60},
-          {text: "사용자 성명", value: "user_name",align: 'center', sortable: false, width: 40},
-          {text: "사용자 상태", value: "user_status",align: 'center', sortable: false, width: 20},
-          {text: "사용자 권한", value: "user_role",align: 'center', sortable: false, width: 20},
+          {text: 'No.', value: 'customer_idx', sortable: false, align: 'center', width: 20 },
+          {text: '고객사 이름', value: 'customer_name', sortable: false,align: 'center', width: 80},
+          {text: "전화번호", value: "customer_tel",align: 'center', sortable: false, width: 60},
+          {text: "주소", value: "customer_address",align: 'center', sortable: false, width: 40},
           {text: "수정/삭제", value: "delete",align: 'center', sortable: false, width: 10},
         ],
         data: [],
@@ -435,18 +354,13 @@ export default {
       addPopup: {
         show: false,
         form: {
-          user_id: '',
-          user_pwd: '',
-          user_pwd_c: '',
-          user_name: '',
-          user_status: '',
-          user_role: '',
-          id:''
+          customer_idx:'',
+          customer_name: '',
+          customer_tel: '',
+          customer_address: '',
         },
         loading:false,
         popup_type: 'ADD',
-        selected_status: null,
-        selected_role:null
       },
       infoPopup: {
         show: false,
@@ -455,15 +369,7 @@ export default {
       deletePopup: {
         show: false,
         delTarget: ''
-      },
-      user_status_list: [
-        { name:'미사용',code: 0},        
-        { name: '사용', code: 1 }
-      ],
-      user_role_list: [
-        { name:'조회',code: 0},        
-        { name: '관리', code: 1 }
-      ]      
+      },   
     };
   },
 };

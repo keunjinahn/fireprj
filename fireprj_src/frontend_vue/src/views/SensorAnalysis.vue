@@ -36,10 +36,12 @@
           :server-items-length="sensor.total"
           :search="sensor.search"
           :items-per-page="5"
+          single-select
+          item-key="id"
           :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
           class="elevation-1 mt-4">
           <template v-slot:item="row">
-            <tr class="clickable-row" @click="onShowGraph(row.item)">
+            <tr @click="onShowGraph(row.item,row)" :class="{'row-active': row.item.id == sensor.selectedId}">
               <td >{{ row.item.id }}</td>
               <td >{{ row.item.last_event_time | moment('YYYY-MM-DD HH:mm:ss')}}</td>
               <td >{{ String(row.item.fk_customer_idx).padStart(5,'0') }}</td>
@@ -87,6 +89,7 @@
               </v-col>
               <v-col cols="8">
               </v-col>
+              <!--
               <v-col cols="2">
                 <v-radio-group
                 inline
@@ -106,7 +109,7 @@
                     </v-col>              
                   </v-row>
                 </v-radio-group>
-              </v-col>              
+              </v-col>-->              
             </v-row>
             
           </v-toolbar>
@@ -224,6 +227,10 @@ export default {
       }, 1000)
     },
     async getSensorLogTempData(){
+      if(this.chart.sensor == undefined || this.chart.sensor == null){
+        clearTimeout(this.tick)
+        return
+      }
       let params = {
         range_value: this.chart.range_value + 1,
         sensor_id: this.chart.sensor,
@@ -240,7 +247,8 @@ export default {
       this.refresh_cnt += 1;
       this.show_anomal_layer = (this.check_type == 1)? true:false
     },
-    onShowGraph(item){
+    onShowGraph(item,row){
+      this.sensor.selectedId = item.id
       this.chart.show=true;
       this.chart.sensor=item.sensor_id;
       this.data_objs.cate = [];
@@ -282,6 +290,8 @@ export default {
   data() {
     return {
       sensor: {
+        selectedId: '',
+        singleSelect: false,        
         headers: [
           {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
           {text: "이벤트 시간", value: "event_datetime", sortable: false,align: 'center', width: 80}, 

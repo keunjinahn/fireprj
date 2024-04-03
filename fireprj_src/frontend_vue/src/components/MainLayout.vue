@@ -25,15 +25,44 @@
         </template>
       </div>
 
+      <v-list-item v-once :to="{name: navLinks[2].subLinks[0].route}" color="primary">
+        <v-list-item-avatar>
+          <v-icon>{{ navLinks[2].icon }}</v-icon>
+        </v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title>{{ navLinks[2].text }}</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <div class="subMenuWrapper">
+        <v-list class="py-0 subMenu" :class="{subMenuOpen: $route.path.startsWith('/monitor')}">
+          <v-list-item dense :to="{name: navLinks[2].subLinks[0].route}" color="primary lighten-2">
+            <v-list-item-content>
+              <v-list-item-title class="pl-14">{{ navLinks[2].subLinks[0].text }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item dense :to="{name: navLinks[2].subLinks[1].route}" color="primary lighten-2">
+            <v-list-item-content>
+              <v-list-item-title class="pl-14">{{ navLinks[2].subLinks[1].text }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item dense :to="{name: navLinks[2].subLinks[2].route}" color="primary lighten-2">
+            <v-list-item-content>
+              <v-list-item-title class="pl-14">{{ navLinks[2].subLinks[2].text }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>            
+        </v-list>
+      </div>
+
+      <v-list-item v-once :to="{name: navLinks[3].subLinks[0].route}" color="primary">
+        <v-list-item-avatar>
+          <v-icon>{{ navLinks[3].icon }}</v-icon>
+        </v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title>{{ navLinks[3].text }}</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+            
       <v-list class="py-0">
-        <!-- <v-list-item v-once :to="{name: navLinks[0].subLinks[0].route}" color="primary">
-          <v-list-item-avatar>
-            <v-icon>{{ navLinks[0].icon }}</v-icon>
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title>{{ navLinks[0].text }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item> -->
         <v-list-item v-once :to="{name: navLinks[1].subLinks[0].route}" color="primary">
           <v-list-item-avatar>
             <v-icon>{{ navLinks[1].icon }}</v-icon>
@@ -61,42 +90,7 @@
             </v-list-item>
           </v-list>
         </div>
-        <v-list-item v-once :to="{name: navLinks[2].subLinks[0].route}" color="primary">
-          <v-list-item-avatar>
-            <v-icon>{{ navLinks[2].icon }}</v-icon>
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title>{{ navLinks[2].text }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <div class="subMenuWrapper">
-          <v-list class="py-0 subMenu" :class="{subMenuOpen: $route.path.startsWith('/monitor')}">
-            <v-list-item dense :to="{name: navLinks[2].subLinks[0].route}" color="primary lighten-2">
-              <v-list-item-content>
-                <v-list-item-title class="pl-14">{{ navLinks[2].subLinks[0].text }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item dense :to="{name: navLinks[2].subLinks[1].route}" color="primary lighten-2">
-              <v-list-item-content>
-                <v-list-item-title class="pl-14">{{ navLinks[2].subLinks[1].text }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item dense :to="{name: navLinks[2].subLinks[2].route}" color="primary lighten-2">
-              <v-list-item-content>
-                <v-list-item-title class="pl-14">{{ navLinks[2].subLinks[2].text }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>            
-          </v-list>
-        </div>
-
-        <v-list-item v-once :to="{name: navLinks[3].subLinks[0].route}" color="primary">
-          <v-list-item-avatar>
-            <v-icon>{{ navLinks[3].icon }}</v-icon>
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title>{{ navLinks[3].text }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+        
 
         <v-list-item v-once :to="{name: navLinks[4].subLinks[0].route}" color="primary">
           <v-list-item-avatar>
@@ -104,6 +98,15 @@
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-title>{{ navLinks[4].text }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item v-once :to="{name: navLinks[5].subLinks[0].route}" color="primary">
+          <v-list-item-avatar>
+            <v-icon>{{ navLinks[5].icon }}</v-icon>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>{{ navLinks[5].text }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -178,12 +181,20 @@ export default {
         ]
       },
       {
+        icon: "mdi-account-switch",
+        text: "CRM",
+        subLinks: [
+          { text: "CRM 관리", route: "crm_manage"},
+        ]
+      },      
+      {
         icon: "mdi-account-plus",
         text: "사용자",
         subLinks: [
           { text: "사용자 관리", route: "user_manage"},
         ]
       },
+
     ],
     logout_dialog: {
       show: false,

@@ -290,3 +290,30 @@ abl-page-popup {
         background-color: #ebebeb;
     }
 }
+
+
+.blue-circle
+{
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid;
+  background-color: #0000ff;
+  opacity: 0.3;
+  margin: auto;
+  border: 2px solid rgb(0, 0, 0);
+}
+.red-circle
+{
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid;
+  background-color: #ff0000;
+  opacity: 0.3;
+  margin: auto;
+  border: 2px solid rgb(0, 0, 0);
+}
+.row-active {
+    background-color: rgb(168, 168, 171);
+}
