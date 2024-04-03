@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import os
 import json
 from functools import wraps
+# import pandas as pd
+import openpyxl
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Color, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
@@ -108,7 +110,7 @@ manager.create_api(EventLogTbl
 
 @app.route('/make-data/event-list', methods=['GET'])
 def write_event_list_api():
-    file_path = 'C:\\Users\\ansieun\\project\\fireprj\\doc\\화재감시시스템 이벤트 리스트_20240215.xlsx'
+    file_path = 'C:\\Users\\ansieun\\project\\fireprj\\doc\\화재감시시스템 이벤트 리스트_20240326.xlsx'
     wb = openpyxl.load_workbook(file_path)
     sheet = wb.get_sheet_by_name('Sheet1')
     
@@ -116,15 +118,19 @@ def write_event_list_api():
     for i, row in enumerate(sheet.rows):
         row_data = []
         for j, col in enumerate(row):
-            if j < 2: continue
+            if j < 1: continue
             row_data.append(col.value)
         if row_data[0] is not None: data.append(row_data)
-    del data[0]
+    print(len(data))
+    for i, row in enumerate(data):
+        if not isinstance(row[0], int):
+            del data[i]
+            continue
+    print(len(data))
 
-    table_list = ['system_id_c', 'repeater_id_c', 'sensor_id_c', 'sensor_value_c', 'inout_id_c', 'event_desc']
+    table_list = ['event_idx', 'system_id_c', 'repeater_id_c', 'sensor_id_c', 'sensor_value_c', 'inout_id_c', 'event_desc', 'event_category']
     for i, row in enumerate(data):
         obj = EventTbl()
-        setattr(obj, 'event_idx', i+1)
         for j, col in enumerate(row):
             setattr(obj, table_list[j], col)
         db.session.add(obj)
