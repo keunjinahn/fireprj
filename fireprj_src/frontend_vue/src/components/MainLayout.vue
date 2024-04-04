@@ -1,7 +1,7 @@
 <template>
   <div class="w-100">
     <v-app-bar app clipped-left dense class="top-menu" color="white" elevation="1">
-      <router-link :to="{name: 'sensor_manage'}" class="d-flex align-center">
+      <router-link :to="{name: 'sensor_log_event'}" class="d-flex align-center">
         <img src="@/assets/logo-black.png" height="40" />
       </router-link>
       <div class="ml-auto d-flex align-center">
@@ -24,7 +24,14 @@
           </v-btn>
         </template>
       </div>
-
+      <!-- <v-list-item v-once :to="{name: navLinks[0].subLinks[0].route}" color="primary">
+        <v-list-item-avatar>
+          <v-icon>{{ navLinks[0].icon }}</v-icon>
+        </v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title>{{ navLinks[0].text }}</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item> -->
       <v-list-item v-once :to="{name: navLinks[2].subLinks[0].route}" color="primary">
         <v-list-item-avatar>
           <v-icon>{{ navLinks[2].icon }}</v-icon>
@@ -150,9 +157,9 @@ export default {
     navLinks: [
       {
         icon: "mdi-desktop-mac-dashboard",
-        text: "대시보드",
+        text: "이벤트 대시보드",
         subLinks: [
-          { text: "대시보드", route: "sensor_dashboard"},
+          { text: "이벤트 대시보드", route: "sensor_log_event"},
         ]
       },     
       {

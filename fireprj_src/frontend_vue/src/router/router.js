@@ -8,13 +8,13 @@ async function rootAccess(to, from, next) {
   if (!session.authentication && to.query.uid) {
     try {
       await session.loginFromProp(to.query.uid)
-      next({ name: 'sensor_manage' })
+      next({ name: 'sensor_log_event' })
     }
     catch (e) {
-      next({ name: 'sensor_manage' })
+      next({ name: 'sensor_log_event' })
     }
   }
-  else next({ name: 'sensor_manage' })
+  else next({ name: 'sensor_log_event' })
 }
 
 const beforeEnter = (to, from, next) => {
@@ -146,6 +146,14 @@ const routes = [{
   name: 'sensor_dashboard',
   component: View.SensorDashboard,
   meta: { breadcrumb: [{ text: '대시보드', disabled: true }, { text: '대시보드', disabled: true }] },
+  props: true,
+  beforeEnter
+},
+{
+  path: '/sensor_log_event',
+  name: 'sensor_log_event',
+  component: View.SensorLogEvent,
+  meta: { breadcrumb: [{ text: '이벤트', disabled: true }, { text: '이벤트', disabled: true }] },
   props: true,
   beforeEnter
 },

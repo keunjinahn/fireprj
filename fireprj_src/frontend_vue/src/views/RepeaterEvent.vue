@@ -131,7 +131,7 @@
           <tr>
             <td >{{ row.item._index }}</td>
             <td >{{ row.item.event_datetime | moment('YYYY-MM-DD HH:mm:ss')}}</td>
-            <td >{{ row.item.event_id }}</td>
+            <td >{{ row.item.event_idx }}</td>
             <td >{{ row.item.sensor_value }}</td>
             <td >{{ row.item.event.event_desc }}</td>
             <td >{{ row.item.inout_id }}</td>
@@ -311,8 +311,8 @@ export default {
         headers: [
           {text: 'No.', value: 'id', sortable: false, align: 'center', width: 20 },
           {text: "이벤트 시간", value: "event_datetime", sortable: false,align: 'center', width: 80}, 
-          {text: "이벤트  ID", value: "event_id", sortable: false,align: 'center', width: 80}, 
-          {text: "센서 값", value: "sensor_value",align: 'center', sortable: false, width: 60},
+          {text: "이벤트 No.", value: "event_id", sortable: false,align: 'center', width: 80}, 
+          {text: "감지기 현재값", value: "sensor_value",align: 'center', sortable: false, width: 60},
           {text: "이벤트 내용", value: "event_desc",align: 'center', sortable: false, width: 150},
           {text: "입출력단 번호", value: "inout_id",align: 'center', sortable: false, width: 40},          
         ],

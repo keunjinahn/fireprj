@@ -39,19 +39,13 @@ manager.create_api(FireReceiverTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)
 
-# def get_realtime_sensor(result=None, **kw):
+# def post_sensor_log(result=None, **kw):
 #     res = result['objects']
-#     all_logs = EventLogTbl.query.all()
+#     event_list = EventTbl.query.all()
 #     for sensor in res:
-#         sensor['regist_status'] = True #등록상태: 센서의 데이터가 존재하면 무조건 True
-#         last_sensor_log = list(filter(lambda x: x.sensor_id == sensor['sensor_id'], all_logs))
-#         if len(last_sensor_log) > 0: last_sensor_log = last_sensor_log[-1]
-#         else: sensor['action_status'] = sensor['network_status'] = sensor['battery_status'] = False; continue
-#         offset_time = datetime.now() - timedelta(minutes=1)
-#         sensor['receiver_type'] = last_sensor_log.receiver_type
-#         sensor['event_datetime'] = last_sensor_log.event_datetime
-#         sensor['action_status'] = sensor['network_status'] = sensor['battery_status'] \
-#         = True if last_sensor_log.event_datetime >= offset_time else False #1분 이내의 데이터가 있으면 True
+#         print("res :",sensor)
+#         event = list(filter(lambda x:x.id==sensor['event_idx'],event_list))[0]
+#         sensor['event_category'] = event.event_category
 
 manager.create_api(FireSensorTbl
                    , results_per_page=10000
@@ -60,7 +54,7 @@ manager.create_api(FireSensorTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True
                    , postprocessors={
-                    #    'GET_MANY': [get_realtime_sensor]
+                        # 'GET_MANY': [post_sensor_log]
                    })
 
 manager.create_api(EventTbl

@@ -21,24 +21,9 @@ class EventTbl(db.Model):
     sensor_value_c = db.Column('sensor_value_c', db.String)
     inout_id_c = db.Column('inout_id_c', db.String)
     event_desc = db.Column('event_desc', db.String)
+    event_category = db.Column('event_category', db.String)
 
 
-class EventLogTbl(db.Model):
-    __tablename__ = 'event_log_tbl'
-
-    event_log_idx = db.Column('event_log_idx', db.Integer, primary_key=True)
-    fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
-    event_id = db.Column('event_id', db.Integer,db.ForeignKey(EventTbl.id))
-    receiver_type = db.Column('receiver_type', db.Integer)
-    receiver_id = db.Column('receiver_id', db.Integer)
-    system_id = db.Column('system_id', db.Integer, default='00')
-    repeater_id = db.Column('repeater_id', db.Integer)
-    sensor_id = db.Column('sensor_id', db.Integer)
-    sensor_value = db.Column('sensor_value', db.String)
-    inout_id = db.Column('inout_id', db.Integer, default='00')
-    event_datetime = db.Column('event_datetime', db.DateTime)
-    customer = db.relationship('CustomerTbl')
-    event = db.relationship('EventTbl')
 
 class FireReceiverTbl(db.Model):
     __tablename__ = 'fire_receiver_tbl'
@@ -49,6 +34,26 @@ class FireReceiverTbl(db.Model):
     receiver_type = db.Column('receiver_type', db.Integer)
     receiver_id = db.Column('receiver_id', db.Integer)
     customer = db.relationship('CustomerTbl')
+    
+class EventLogTbl(db.Model):
+    __tablename__ = 'event_log_tbl'
+
+    event_log_idx = db.Column('event_log_idx', db.Integer, primary_key=True)
+    fk_customer_idx = db.Column('fk_customer_idx', db.Integer, db.ForeignKey(CustomerTbl.customer_idx))
+    event_id = db.Column('event_id', db.Integer,db.ForeignKey(EventTbl.id))
+    event_idx = db.Column('event_idx', db.Integer)
+    receiver_type = db.Column('receiver_type', db.Integer)
+    receiver_id = db.Column('receiver_id', db.Integer,db.ForeignKey(FireReceiverTbl.receiver_id))
+    system_id = db.Column('system_id', db.Integer, default='00')
+    repeater_id = db.Column('repeater_id', db.Integer)
+    sensor_id = db.Column('sensor_id', db.Integer)
+    sensor_value = db.Column('sensor_value', db.String)
+    inout_id = db.Column('inout_id', db.Integer, default='00')
+    event_datetime = db.Column('event_datetime', db.DateTime)
+    customer = db.relationship('CustomerTbl')
+    event = db.relationship('EventTbl')
+    receiver = db.relationship('FireReceiverTbl')
+
 
 class FireRepeaterTbl(db.Model):
     __tablename__ = 'fire_repeater_tbl'

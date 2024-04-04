@@ -56,7 +56,7 @@ export default {
         if (data.status) {
           this.$session.login(data)
           await this.$session.setToken(data.user)
-          this.$router.push('/monitor/sensor_event')
+          this.$router.push('/sensor_log_event')
         }else {
           if (data.reason == 1) {
             alert('로그인이 실패(아이디를 확인하여주세요!)')
@@ -72,7 +72,7 @@ export default {
       finally {
         this.loading = false
       }
-      this.$router.replace({name: 'sensor_manage'})
+      this.$router.replace({name: 'sensor_log_event'})
     }
   },
   data(){

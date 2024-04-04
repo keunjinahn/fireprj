@@ -177,7 +177,7 @@ export default {
     return {
       sensor: {
         headers: [
-          {text: "이벤트", value: "event_idx", sortable: false,align: 'center', width: 40},
+          {text: "이벤트 No.", value: "event_idx", sortable: false,align: 'center', width: 40},
           {text: "계통 번호", value: "system_id_c",align: 'center', sortable: false, width: 60},
           {text: "중계기 번호", value: "repeater_id_c",align: 'center', sortable: false, width: 40},
           {text: "감지기 번호", value: "sensor_id_c",align: 'center', sortable: false, width: 20},
