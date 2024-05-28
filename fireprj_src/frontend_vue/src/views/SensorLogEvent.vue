@@ -47,18 +47,18 @@
         :footer-props="{'items-per-page-options': [5, 10, 15,20,25,30,-1]}"
         class="elevation-1 mt-4">
           <template v-slot:item="row">
-            <tr>
-              <td >{{ row.item._index }}</td>
-              <td >{{ row.item.event_datetime | moment('YYYY-MM-DD HH:mm:ss')}}</td>
-              <td >{{ row.item.event.event_category }}</td>
-              <td >{{ row.item.event.event_desc }}</td>
-              <td >{{ row.item.customer.customer_name }}</td>
-              <td >{{ $session.receiver_type_list.find(v=>v.code==row.item.receiver_type).name }}</td>
-              <td>{{ String(row.item.receiver_id).padStart(3,'0') }}</td>
-              <td >{{ String(row.item.system_id).padStart(3,'0') }}</td>
-              <td >{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
-              <td >{{ String(row.item.sensor_id).padStart(3,'0') }}</td>
-              <td >{{ row.item.sensor_value }}</td>
+            <tr >
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ row.item._index }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ row.item.event_datetime | moment('YYYY-MM-DD HH:mm:ss')}}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ row.item.event.event_category }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ row.item.event.event_desc }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ row.item.customer.customer_name }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ $session.receiver_type_list.find(v=>v.code==row.item.receiver_type).name }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ String(row.item.receiver_id).padStart(3,'0') }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ String(row.item.system_id).padStart(3,'0') }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ String(row.item.repeater_id).padStart(3,'0') }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ String(row.item.sensor_id).padStart(3,'0') }}</td>
+              <td :class="{'red-event': check_red(row.item.event_id)}">{{ row.item.sensor_value }}</td>
             </tr>
           </template>
         </v-data-table> 
@@ -145,17 +145,38 @@ export default {
         link.click()
       })
       .catch(() => console.log('error: excel download error'))
-    }
-    
+    },
+    check_red(index){
+      if(index == 145 || index == 20 || index == 39)
+        return true
+      return false
+    },
+    startInterval() {
+      this.stopInterval();
 
+      this.intervalId = setInterval(() => {
+        this.getSensorEvent()
+      }, 1000);
+    },
+    stopInterval() {
+      if (this.intervalId) {
+        clearInterval(this.intervalId)
+        this.intervalId = null
+      }
+    },
   },
   mounted() {
     this.getSensorEvent()
+    this.startInterval()
+  },
+  beforeDestroy() {
+    this.stopInterval()
   },
   watch: {
     "event.options": {
       handler() {
-        this.getSensorEvent()
+        this.stopInterval()
+        this.startInterval()
       },
       deep: true,
     },
@@ -204,10 +225,13 @@ export default {
         options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},
         loading: false,
         search: '',
-        total:0
+        total:0,
+        red_event_list:[145,20,39],
+
       },      
       loading: false,
-      selected_sensor:null
+      selected_sensor:null,
+      intervalId:null
     };
   },
 };
@@ -238,5 +262,8 @@ td {
   margin-left:10px;
   margin-bottom: 10px;
   width:48%;
+}
+.red-event{
+  color:red
 }
 </style>
