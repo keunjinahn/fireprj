@@ -484,7 +484,7 @@ export default {
           {text: "수신기 번호", value: "receiver_id",align: 'center', sortable: false, width: 40},
           {text: "계통 번호", value: "system_id",align: 'center', sortable: false, width: 20},
           {text: "중계기 번호", value: "repeater_id",align: 'center', sortable: false, width: 20},
-          {text: "삭제 여부", value: "delete",align: 'center', sortable: false, width: 20},
+          {text: "수정/삭제", value: "delete",align: 'center', sortable: false, width: 20},
         ],
         data: [],
         options: {"page":1,"itemsPerPage":10,"sortBy":[],"sortDesc":[],"groupBy":[],"groupDesc":[],"mustSort":false,"multiSort":false},

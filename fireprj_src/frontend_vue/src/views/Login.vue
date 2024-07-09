@@ -2,7 +2,13 @@
   <v-main class="login-main">
     <v-container class="fill-height" color="transparent" fluid>
       <v-row align="center" justify="center">
+        
         <v-col cols="12" sm="12" md="5">
+          <div class="row-right">
+            <img @click="move_site('kor')" src="@/assets/kor.png" height="30" />
+            <img @click="move_site('eng')" class="l-m-10" src="@/assets/eng.png" height="30" /> 
+          </div>
+       
           <div class="login-container">
             <router-view />
           </div>
@@ -11,7 +17,22 @@
     </v-container>
   </v-main>
 </template>
-
+<script>
+export default {
+  methods: {
+    move_site(type) {
+      if(type == 'eng')
+        window.location.replace('http://139.150.69.115/eng/');
+      else  if(type == 'kor')
+        window.location.replace('http://139.150.69.115/');
+    }
+  },  
+  data(){
+    return {
+    };
+  }
+}
+</script>
 <style lang="scss" scoped>
   .login-main {
     background-color: #E6EEFF !important;
@@ -61,5 +82,12 @@
       padding: 8px 10px 8px 0;
       margin: 6px 8px 6px 0;
     }
+  }
+  .l-m-10{
+    margin-left: 20px;
+  }
+  .row-right{
+    text-align: right;
+    cursor: pointer;
   }
 </style>

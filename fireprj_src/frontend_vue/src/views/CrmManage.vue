@@ -253,6 +253,18 @@ export default {
       }   
     },
     async addUser() {
+      if(this.addPopup.form.customer_name == undefined || this.addPopup.form.customer_name.length < 5){
+        alert("이름을 입력해 주세요!")
+        return
+      }
+      if(this.addPopup.form.customer_tel == undefined || this.addPopup.form.customer_tel.length < 10){
+        alert("전화번호를 입력해 주세요!")
+        return
+      }      
+      if(this.addPopup.form.customer_address == undefined || this.addPopup.form.customer_address.length < 5){
+        alert("주소를 입력해 주세요!")
+        return
+      }       
       let param = {
         customer_name: this.addPopup.form.customer_name,
         customer_tel: this.addPopup.form.customer_tel,

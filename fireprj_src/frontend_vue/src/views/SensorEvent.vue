@@ -166,6 +166,9 @@ export default {
         let filters_or = []
         let filters_and = []
         let order_by = []
+        filters_and.push({name: 'fk_customer_idx', op: 'eq', val: item.fk_customer_idx})
+        filters_and.push({name: 'receiver_id', op: 'eq', val: item.receiver.receiver_id})
+        //filters_and.push({name: 'repeter_id', op: 'eq', val: item.repeter.repeter_id})        
         filters_and.push({name: 'sensor_id', op: 'eq', val: item.sensor_id})
         order_by.push({field: "event_log_idx", direction: 'desc'})
         let q = {

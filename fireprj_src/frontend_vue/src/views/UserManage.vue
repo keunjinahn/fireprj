@@ -324,6 +324,19 @@ export default {
         user_status: this.addPopup.form.user_status,
         user_role: this.addPopup.form.user_role,
       }
+
+      if(this.addPopup.form.user_id == undefined || this.addPopup.form.user_id.length < 2){
+        alert("아이디를 입력해 주세요!")
+        return
+      }
+      if(this.addPopup.form.user_name == undefined || this.addPopup.form.user_name.length < 4){
+        alert("이름을 입력해 주세요!")
+        return
+      }       
+      if(this.addPopup.form.user_pwd == undefined || this.addPopup.form.user_pwd.length < 2){
+        alert("패스워드를 입력해 주세요!")
+        return
+      }       
       if (this.addPopup.popup_type == 'ADD') {
         await this.$http.post("user", param)
       } else {

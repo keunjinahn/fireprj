@@ -22,17 +22,27 @@ import random
 
 manager.create_api(FireSensorTbl
                    , results_per_page=10000
-                   , url_prefix='/api/v1'
+                   , url_prefix='/eng/api/v1'
                    , collection_name='sensor'
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)
+
+def post_repeter_log(result=None, **kw):
+    res = result['objects']
+    for repeter in res:
+        receiver = FireReceiverTbl.query.filter_by(fk_customer_idx=repeter['fk_customer_idx']).filter_by(receiver_id=repeter['receiver_id']).first()
+        if receiver is not None :
+            repeter['receiver']['receiver_type'] = receiver.receiver_type
 
 manager.create_api(FireRepeaterTbl
                    , results_per_page=10000
                    , url_prefix='/api/v1'
                    , collection_name='repeater'
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
-                   , allow_patch_many=True)
+                   , allow_patch_many=True
+                   , postprocessors={
+                        'GET_MANY': [post_repeter_log]
+                   })
 
 manager.create_api(FireReceiverTbl
                    , results_per_page=10000
@@ -41,13 +51,12 @@ manager.create_api(FireReceiverTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)
 
-# def post_sensor_log(result=None, **kw):
-#     res = result['objects']
-#     event_list = EventTbl.query.all()
-#     for sensor in res:
-#         print("res :",sensor)
-#         event = list(filter(lambda x:x.id==sensor['event_idx'],event_list))[0]
-#         sensor['event_category'] = event.event_category
+def post_sensor_log(result=None, **kw):
+    res = result['objects']
+    for sensor in res:
+        receiver = FireReceiverTbl.query.filter_by(fk_customer_idx=sensor['fk_customer_idx']).filter_by(receiver_id=sensor['receiver_id']).first()
+        if receiver is not None :
+            sensor['receiver']['receiver_type'] = receiver.receiver_type
 
 manager.create_api(FireSensorTbl
                    , results_per_page=10000
@@ -56,7 +65,7 @@ manager.create_api(FireSensorTbl
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True
                    , postprocessors={
-                        # 'GET_MANY': [post_sensor_log]
+                        'GET_MANY': [post_sensor_log]
                    })
 
 manager.create_api(EventTbl
