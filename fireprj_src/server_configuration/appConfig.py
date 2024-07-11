@@ -10,8 +10,8 @@ class CommonConfig(object):
 class DevelopmentConfig(CommonConfig):
     DATABASE = "fireprjdb"
     BIND_PORT = 8081
-    SQLALCHEMY_DATABASE_URI = 'mysql://dbadmin:p#ssw0rd@127.0.0.1/fireprjdb'
-    #SQLALCHEMY_DATABASE_URI = 'mysql://dbadmin:p#ssw0rd@139.150.69.115/fireprjdb'
+    #SQLALCHEMY_DATABASE_URI = 'mysql://dbadmin:p#ssw0rd@127.0.0.1/fireprjdb'
+    SQLALCHEMY_DATABASE_URI = 'mysql://dbadmin:p#ssw0rd@139.150.69.115/fireprjdb'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DAEMON_HEADERS = {'Content-type': 'application/json'}
     UPLOAD_FOLDER = "./"

@@ -22,7 +22,7 @@ import random
 
 manager.create_api(FireSensorTbl
                    , results_per_page=10000
-                   , url_prefix='/eng/api/v1'
+                   , url_prefix='/api/v1'
                    , collection_name='sensor'
                    , methods=['GET', 'DELETE', 'PATCH', 'POST']
                    , allow_patch_many=True)

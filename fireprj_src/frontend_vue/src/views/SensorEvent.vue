@@ -160,6 +160,7 @@ export default {
       }   
     },
     async onSensorItemClick(item){
+      if(item == null) return
       this.sensor.selectedId = item.id
       const { page, itemsPerPage, sortBy, sortDesc } = this.event.options;
       try {
@@ -168,7 +169,7 @@ export default {
         let order_by = []
         filters_and.push({name: 'fk_customer_idx', op: 'eq', val: item.fk_customer_idx})
         filters_and.push({name: 'receiver_id', op: 'eq', val: item.receiver.receiver_id})
-        //filters_and.push({name: 'repeter_id', op: 'eq', val: item.repeter.repeter_id})        
+        filters_and.push({name: 'repeater_id', op: 'eq', val: item.repeater.repeater_id})        
         filters_and.push({name: 'sensor_id', op: 'eq', val: item.sensor_id})
         order_by.push({field: "event_log_idx", direction: 'desc'})
         let q = {
